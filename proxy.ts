@@ -26,13 +26,24 @@ export async function proxy(request: NextRequest) {
 
   const pathname = new URL(request.url).pathname
 
-  let decoded : JWT;
+  let decoded: JWT;
 
   if (token) {
     decoded = await jwt.verify(token, secrate) as JWT
     const role = await decoded.role
 
     console.log(decoded)
+
+    if (role == "admin") {
+      if(dashboard != "admin"){
+        return NextResponse.redirect( new URL('/login/admin', request.url))
+      }
+      const response = NextResponse.next()
+      response.headers.set("url", request.url)
+      response.headers.set("ID", decoded.agentId!)
+      return response
+
+    }
 
 
 
