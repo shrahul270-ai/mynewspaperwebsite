@@ -93,6 +93,8 @@ export default function BookletsPage() {
                   <TableHead>Price</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
+                  <TableHead>Edit</TableHead>
+
                 </TableRow>
               </TableHeader>
 
@@ -119,6 +121,11 @@ export default function BookletsPage() {
 
                     <TableCell>
                       {new Date(b.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <a href={`/admin/booklets/${b._id}/edit`}>
+                        <Button>Edit</Button>
+                      </a>
                     </TableCell>
                   </TableRow>
                 ))}

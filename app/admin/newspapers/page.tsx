@@ -59,6 +59,8 @@ export default async function AgentNewspapers() {
             <TableHead>Language</TableHead>
             <TableHead>Price</TableHead>
             <TableHead className="text-right">Status</TableHead>
+            <TableHead className="text-right">Edit</TableHead>
+
           </TableRow>
         </TableHeader>
 
@@ -71,6 +73,11 @@ export default async function AgentNewspapers() {
 
               <TableCell className="text-right">
                 <Badge variant={"default"}>Active</Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <a href={`/admin/newspapers/${paper._id}/edit`}>
+                  <Button>Edit</Button>
+                </a>
               </TableCell>
             </TableRow>
           ))}

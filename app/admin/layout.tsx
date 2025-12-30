@@ -37,7 +37,7 @@ export default function AdminLayout({
           <Button variant="ghost" className="justify-start" asChild>
             <Link href="/admin/add-booklet">Add Booklet</Link>
           </Button>
-
+{/* 
           <Separator className="my-2" />
 
           <Button variant="ghost" className="justify-start" asChild>
@@ -46,7 +46,7 @@ export default function AdminLayout({
 
           <Button variant="ghost" className="justify-start" asChild>
             <Link href="/admin/customers">Customers</Link>
-          </Button>
+          </Button> */}
         </nav>
       </aside>
 
