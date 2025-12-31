@@ -5,6 +5,7 @@ import CustomerCalendarPage from "@/components/customer/Calander"
 import CustomerEditProfilePage from "@/components/customer/edit_profile";
 import CustomerAllPapersPage from "@/components/customer/newspapers";
 import CustomerProfilePage from "@/components/customer/Profile"
+import CustomerSelectAgentPage from "@/components/customer/select_agent_page";
 
 export default async function Page({
   params,
@@ -57,6 +58,12 @@ export default async function Page({
       return (
         <div className="w-full h-full">
           <CustomerEditProfilePage />
+        </div>
+      )
+       case "select-agent":
+      return (
+        <div className="w-full h-full">
+          <CustomerSelectAgentPage />
         </div>
       )
     default:

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { MongoClient } from "mongodb"
 import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
 
 /* =======================
    MongoDB
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
       surname,
       mobile,
       email,
-      password, // ✅ password added
+      password,
       address,
       state,
       district,
@@ -28,7 +29,9 @@ export async function POST(req: NextRequest) {
       gender,
     } = body
 
-    // ✅ Validation
+    /* =======================
+       Validation
+    ======================= */
     if (!name || !mobile || !email || !password || !address) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
@@ -40,7 +43,9 @@ export async function POST(req: NextRequest) {
     const db = client.db("maindatabase")
     const customers = db.collection("customers")
 
-    // ❌ Duplicate check
+    /* =======================
+       Duplicate Check
+    ======================= */
     const exists = await customers.findOne({
       $or: [{ mobile }, { email }],
     })
@@ -52,47 +57,72 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 🔐 Hash password
+    /* =======================
+       Hash Password
+    ======================= */
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // ✅ Insert customer
-    const customer = {
+    /* =======================
+       Insert Customer
+    ======================= */
+    const customerDoc = {
       name,
       surname,
       mobile,
       email,
-      password: hashedPassword, // ✅ saved securely
-
+      password: hashedPassword,
       address,
       state,
       district,
       tehsil,
       village,
       pincode,
-
       age: Number(age),
       gender,
-
       created_at: new Date(),
     }
 
-    const result = await customers.insertOne(customer)
+    const result = await customers.insertOne(customerDoc)
 
-    return NextResponse.json(
+    /* =======================
+       JWT Token
+    ======================= */
+    const token = jwt.sign(
+      {
+        customerId: result.insertedId.toString(),
+        role: "customer",
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "7d" }
+    )
+
+    /* =======================
+       Response + Cookie
+    ======================= */
+    const response = NextResponse.json(
       {
         success: true,
-        data: {
-          _id: result.insertedId,
-          name,
+        customer: {
+          id: result.insertedId.toString(),
           email,
-          mobile,
+          name,
         },
       },
       { status: 201 }
     )
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60,
+      path: "/",
+    })
+
+    return response
   } catch (err: any) {
     return NextResponse.json(
-      { success: false, message: err.message },
+      { success: false, message: err.message || "Server error" },
       { status: 500 }
     )
   } finally {

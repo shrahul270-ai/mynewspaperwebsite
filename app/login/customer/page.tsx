@@ -41,7 +41,7 @@ export default function LoginPage() {
       });
 
       router.push("/customer/profile");
-      router.refresh(); 
+      router.refresh();
     } catch (err: any) {
       // Sonner Error Message
       toast.error("Authentication Failed", {
@@ -63,13 +63,13 @@ export default function LoginPage() {
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
-        
+
         <div className="relative z-10 flex h-full flex-col justify-between p-12 text-white">
           <Link href="/" className="flex items-center gap-2 w-fit">
             <Newspaper className="h-8 w-8 text-primary-foreground" />
             <span className="text-2xl font-serif font-bold tracking-tighter italic leading-none">The Daily Press</span>
           </Link>
-          
+
           <div className="space-y-6">
             <h2 className="text-6xl font-serif font-bold leading-[1.1] tracking-tight">
               Quality journalism, <br /> delivered daily.
@@ -126,15 +126,15 @@ export default function LoginPage() {
                 className="h-12 text-black border-zinc-200 focus-visible:ring-1 focus-visible:ring-zinc-950 rounded-none bg-zinc-50/50"
               />
             </div>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-12 bg-zinc-900 text-white hover:bg-zinc-800 transition-all rounded-none font-bold text-base"
               disabled={isLoading}
             >
               {isLoading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                "Continue to Delivery"
+                "Continue to Login"
               )}
             </Button>
           </form>
@@ -147,20 +147,38 @@ export default function LoginPage() {
               <span className="bg-white px-4 text-zinc-400">Secure Access</span>
             </div>
           </div>
-          <Link href="/login/agent" >
-           <Button 
-            variant="default" 
-            type="button"
-            className="w-full h-12 rounded-none font-semibold transition-colors"
-          >
-            I am Agent
-          </Button>
-          </Link>
-        
-        <div className="my-2"></div>
 
-          <Button 
-            variant="outline" 
+          <Link href="/login/hoker" >
+
+            <Button
+              variant="default"
+              
+              type="button"
+              className="w-full h-12 rounded-none font-semibold hover:text-black text-white bg-red-500"
+            >
+              I am Hoker
+            </Button>
+          </Link>
+
+          <div className="my-3"></div>
+
+
+          <Link href="/login/agent" >
+
+            <Button
+              variant="default"
+              type="button"
+              className="w-full h-12 rounded-none font-semibold transition-colors "
+            >
+              I am Agent
+            </Button>
+          </Link>
+
+
+          <div className="my-2"></div>
+
+          <Button
+            variant="outline"
             type="button"
             className="w-full h-12 border-zinc-200 hover:bg-sky-500 hover:text-white rounded-none font-semibold transition-colors"
           >

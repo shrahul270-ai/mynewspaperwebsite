@@ -70,7 +70,7 @@ export default function CustomerSignupPage() {
 
       if (response.ok) {
         alert('Registration successful!')
-        router.push('/customer/profile')
+        router.push('/customer/select-agent')
       } else {
         alert('Registration failed. Please try again.')
       }
