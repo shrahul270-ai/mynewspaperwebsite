@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 
 /* ================= TYPES ================= */
 interface Customer {
@@ -100,12 +101,34 @@ export default async function AdminCustomersPage() {
                             {/* Customer */}
                             <TableCell className="flex items-center gap-3">
 
-                                <Avatar>
-                                    {customer.photo && <AvatarImage src={customer.photo} />}
-                                    <AvatarFallback>
-                                        {(customer.name[0] + customer.surname[0]).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <div className="cursor-pointer">
+                                            <Avatar className="h-10 w-10">
+                                                {customer.photo && (
+                                                    <AvatarImage src={customer.photo} />
+                                                )}
+                                                <AvatarFallback>
+                                                    {(customer.name[0] + customer.surname[0]).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        </div>
+                                    </DialogTrigger>
+
+                                    <DialogContent className="max-w-md p-0 overflow-hidden">
+                                        {customer.photo ? (
+                                            <img
+                                                src={customer.photo}
+                                                alt="Customer Photo"
+                                                className="w-full h-auto object-contain"
+                                            />
+                                        ) : (
+                                            <div className="p-6 text-center text-muted-foreground">
+                                                No image available
+                                            </div>
+                                        )}
+                                    </DialogContent>
+                                </Dialog>
 
                                 <div>
                                     <p className="font-medium">

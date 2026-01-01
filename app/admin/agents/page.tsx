@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 
 /* ================= TYPES ================= */
 
@@ -101,12 +102,34 @@ export default async function AdminAgentsPage() {
             <TableRow key={agent._id}>
               {/* Agent */}
               <TableCell className="flex items-center gap-3">
-                <Avatar>
-                  <AvatarImage src={agent.photo} />
-                  <AvatarFallback>
-                    {agent.full_name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                 <Dialog>
+      <DialogTrigger asChild>
+        <div className="cursor-pointer">
+          <Avatar className="h-10 w-10">
+            {agent.photo && (
+              <AvatarImage src={agent.photo} />
+            )}
+            <AvatarFallback>
+              {(agent.full_name[0]).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      </DialogTrigger>
+
+      <DialogContent className="max-w-md p-0 overflow-hidden">
+        {agent.photo ? (
+          <img
+            src={agent.photo}
+            alt="Customer Photo"
+            className="w-full h-auto object-contain"
+          />
+        ) : (
+          <div className="p-6 text-center text-muted-foreground">
+            No image available
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
 
                 <div>
                   <p className="font-medium">{agent.full_name}</p>
