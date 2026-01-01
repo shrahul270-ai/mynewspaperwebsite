@@ -24,37 +24,53 @@ export default function LoginPage() {
   const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+  e.preventDefault()
+  setLoading(true)
+  setError("")
 
-    try {
-      const res = await fetch("/api/agent/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // 🍪 cookie allow
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
+  try {
+    const res = await fetch("/api/agent/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    })
 
-      const data = await res.json()
+    const data = await res.json()
 
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed")
+    /* 🚫 Pending / Rejected */
+    if (res.status === 403) {
+      if (data.message?.toLowerCase().includes("approval")) {
+        router.push("/pending-approval")
+        return
       }
 
-      // ✅ Login success → redirect
-      router.push("/agent/profile")
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+      if (data.message?.toLowerCase().includes("rejected")) {
+        router.push("/rejected") // optional page
+        return
+      }
     }
+
+    /* ❌ Other errors */
+    if (!res.ok) {
+      setError(data.message || "Login failed")
+      return
+    }
+
+    /* ✅ Success */
+    router.push("/agent/profile")
+  } catch (err: any) {
+    setError("Something went wrong")
+  } finally {
+    setLoading(false)
   }
+}
+
 
   return (
     <div className="flex min-h-screen w-full">

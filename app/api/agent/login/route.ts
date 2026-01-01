@@ -3,33 +3,59 @@ import { MongoClient } from "mongodb"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 
+/* ======================
+   CONFIG
+====================== */
 const MONGODB_URI = process.env.MONGODB_URI!
 const JWT_SECRET = process.env.JWT_SECRET!
 
-const client = new MongoClient(MONGODB_URI)
+if (!MONGODB_URI || !JWT_SECRET) {
+  throw new Error("Missing environment variables")
+}
 
+/* ======================
+   MONGO SINGLETON
+====================== */
+let client: MongoClient
+let clientPromise: Promise<MongoClient>
+
+declare global {
+  var _mongoClientPromise: Promise<MongoClient> | undefined
+}
+
+if (!global._mongoClientPromise) {
+  client = new MongoClient(MONGODB_URI)
+  global._mongoClientPromise = client.connect()
+}
+clientPromise = global._mongoClientPromise
+
+/* ======================
+   POST : AGENT LOGIN
+====================== */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { email, mobile, password } = body
 
+    /* 🔍 Validation */
     if ((!email && !mobile) || !password) {
       return NextResponse.json(
-        { success: false, message: "Email/Mobile and password required" },
+        { success: false, message: "Email or Mobile and password required" },
         { status: 400 }
       )
     }
 
-    await client.connect()
+    /* 🔗 Mongo */
+    const client = await clientPromise
     const db = client.db("maindatabase")
     const agents = db.collection("agents")
 
-    const agent = await agents.findOne({
-      $or: [
-        email ? { email } : {},
-        mobile ? { mobile } : {},
-      ],
-    })
+    /* 🧠 SAFE QUERY (NO EMPTY OBJECT) */
+    const orQuery: any[] = []
+    if (email) orQuery.push({ email })
+    if (mobile) orQuery.push({ mobile })
+
+    const agent = await agents.findOne({ $or: orQuery })
 
     if (!agent) {
       return NextResponse.json(
@@ -38,7 +64,12 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const isMatch = await bcrypt.compare(password, agent.password_hash)
+    /* 🔐 Password check */
+    const isMatch = await bcrypt.compare(
+      password,
+      agent.password_hash
+    )
+
     if (!isMatch) {
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
@@ -46,7 +77,21 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // ✅ Create JWT
+    /* 🚫 STATUS CHECK */
+    if (agent.status !== "approved") {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            agent.status === "pending"
+              ? "Your account is under approval"
+              : "Your account has been rejected",
+        },
+        { status: 403 }
+      )
+    }
+
+    /* 🎫 JWT */
     const token = jwt.sign(
       {
         agentId: agent._id.toString(),
@@ -56,14 +101,13 @@ export async function POST(req: NextRequest) {
       { expiresIn: "7d" }
     )
 
-    // ✅ Response + Cookie
+    /* 🍪 RESPONSE + COOKIE */
     const response = NextResponse.json(
       {
         success: true,
-        token, // (optional) frontend ke liye
         agent: {
           _id: agent._id,
-          name: agent.name,
+          full_name: agent.full_name,
           email: agent.email,
           mobile: agent.mobile,
         },
@@ -71,22 +115,21 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     )
 
-    // 🍪 Set cookie
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60,
       path: "/",
     })
 
     return response
   } catch (err: any) {
+    console.error("Agent login error:", err)
+
     return NextResponse.json(
-      { success: false, message: err.message },
+      { success: false, message: "Internal server error" },
       { status: 500 }
     )
-  } finally {
-    await client.close()
   }
 }

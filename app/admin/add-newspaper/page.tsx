@@ -35,38 +35,38 @@ export default function AddAgentNewspaper() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setLoading(true)
+    e.preventDefault()
+    setLoading(true)
 
-  try {
-    const res = await fetch("/api/agent/newspapers/add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: form.name,
-        price: form.price,
-        language: form.language,
-      }),
-    })
+    try {
+      const res = await fetch("/api/agent/newspapers/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          price: form.price,
+          language: form.language,
+        }),
+      })
 
-    const data = await res.json()
+      const data = await res.json()
 
-    if (!res.ok) {
-      alert(data.message || "Something went wrong")
+      if (!res.ok) {
+        alert(data.message || "Something went wrong")
+        setLoading(false)
+        return
+      }
+
+      // ✅ Success
+      router.push("/admin/newspapers")
+    } catch (error) {
+      console.error(error)
+      alert("Server error")
       setLoading(false)
-      return
     }
-
-    // ✅ Success
-    router.push("/admin/newspapers")
-  } catch (error) {
-    console.error(error)
-    alert("Server error")
-    setLoading(false)
   }
-}
 
 
   return (
@@ -109,7 +109,24 @@ export default function AddAgentNewspaper() {
                   <SelectItem value="English">English</SelectItem>
                   <SelectItem value="Marathi">Marathi</SelectItem>
                   <SelectItem value="Gujarati">Gujarati</SelectItem>
+                  <SelectItem value="Punjabi">Punjabi</SelectItem>
+                  <SelectItem value="Bengali">Bengali</SelectItem>
+                  <SelectItem value="Tamil">Tamil</SelectItem>
+                  <SelectItem value="Telugu">Telugu</SelectItem>
+                  <SelectItem value="Kannada">Kannada</SelectItem>
+                  <SelectItem value="Malayalam">Malayalam</SelectItem>
+                  <SelectItem value="Odia">Odia</SelectItem>
+                  <SelectItem value="Assamese">Assamese</SelectItem>
+                  <SelectItem value="Urdu">Urdu</SelectItem>
+                  <SelectItem value="Sanskrit">Sanskrit</SelectItem>
+                  <SelectItem value="Konkani">Konkani</SelectItem>
+                  <SelectItem value="Sindhi">Sindhi</SelectItem>
+                  <SelectItem value="Nepali">Nepali</SelectItem>
+                  <SelectItem value="Maithili">Maithili</SelectItem>
+                  <SelectItem value="Bhojpuri">Bhojpuri</SelectItem>
+                  <SelectItem value="Rajasthani">Rajasthani</SelectItem>
                 </SelectContent>
+
               </Select>
             </div>
 

@@ -153,7 +153,7 @@ export default function AgentSignupPage() {
             }
 
             alert("Registration successful! Please wait for admin approval.");
-            navigate.push("/login/agent");
+            navigate.push("/pending-approval");
         } catch (error: any) {
             console.error("Registration failed:", error);
             alert(error.message || "Registration failed. Please try again.");
