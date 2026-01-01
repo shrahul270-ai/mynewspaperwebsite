@@ -14,7 +14,8 @@ import {
   ChevronDown,
   Bell,
   Search,
-  Newspaper
+  Newspaper,
+  DollarSign
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
@@ -51,6 +52,8 @@ const menuItems = [
   { id: "all-bills", label: "All Bills", icon: FileText, badge: "", href: "/agent/bills" },
   { id: "deliveries", label: "Deliveries", icon: Truck, badge: "", href: "/agent/deliveries" },
   { id: "newspapers", label: "Newspapers", icon: Newspaper, badge: "", href: "/agent/newspapers" },
+  { id: "pay-requests", label: "Pay Requests", icon: DollarSign, badge: "", href: "/agent/pay-requests" },
+
 
 ]
 

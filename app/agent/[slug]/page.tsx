@@ -10,6 +10,7 @@ import AgentProfilePage from '@/components/agent/edit_profile'
 import AgentGenerateBillPage from '@/components/agent/genrateBill'
 import AgentHokers from '@/components/agent/Hockers'
 import AgentNewspapers from '@/components/agent/NewsPapers'
+import AgentPayRequestsPage from '@/components/agent/pay_requests'
 import AgentProfile from '@/components/agent/profile'
 import { headers } from 'next/headers'
 import React from 'react'
@@ -77,6 +78,10 @@ export default async function Page() {
     {
       component: AgentEditAllotedCustomerPage,
       path: '/edit-allotment',
+    },
+      {
+      component: AgentPayRequestsPage,
+      path: '/pay-requests',
     },
   ]
 

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import Link from "next/link"
 
 interface BillItem {
   type: "newspaper" | "booklet"
@@ -97,13 +98,11 @@ export default function CustomerBillsPage() {
             {/* Pay Button */}
             {(bill.status === "unpaid" || bill.status === "pending") && (
               <Button
-                className="w-full"
-                onClick={() => {
-                  console.log("Pay bill:", bill._id)
-                  // next: payment API / razorpay
-                }}
+                className="w-full"                
               >
+                <Link href={`/customer/pay/${bill._id}`}>
                 Pay Now
+                </Link>
               </Button>
             )}
           </CardContent>
