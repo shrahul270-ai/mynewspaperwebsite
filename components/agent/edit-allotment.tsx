@@ -21,13 +21,12 @@ interface AllotedCustomer {
 export default function AgentEditAllotedCustomerPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  // ✅ ?id=XXXX
   const id = searchParams.get("id")
 
   const [form, setForm] = useState<AllotedCustomer | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   /* =====================
      Fetch Data
@@ -42,8 +41,7 @@ export default function AgentEditAllotedCustomerPage() {
     const fetchData = async () => {
       try {
         const res = await fetch(`/api/agent/alloted-customer/${id}`)
-
-        if (!res.ok) throw new Error("Fetch failed")
+        if (!res.ok) throw new Error()
 
         const data = await res.json()
 
@@ -90,6 +88,34 @@ export default function AgentEditAllotedCustomerPage() {
     }
   }
 
+  /* =====================
+     Delete
+  ===================== */
+  const handleDelete = async () => {
+    if (!id) return
+
+    const ok = confirm(
+      "Are you sure? This will remove the allotment permanently."
+    )
+    if (!ok) return
+
+    setDeleting(true)
+
+    try {
+      const res = await fetch(`/api/agent/alloted-customer/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok) throw new Error()
+
+      router.back()
+    } catch {
+      alert("Delete failed")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (loading) return <div className="p-4">Loading...</div>
   if (!form) return null
 
@@ -123,9 +149,25 @@ export default function AgentEditAllotedCustomerPage() {
           <Label>Active</Label>
         </div>
 
-        <Button onClick={handleSave} disabled={saving} className="w-full">
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
+        {/* ACTION BUTTONS */}
+        <div className="flex gap-3 pt-2">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1"
+          >
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="flex-1"
+          >
+            {deleting ? "Deleting..." : "Delete Allotment"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )

@@ -87,9 +87,7 @@ export default function CustomerAgentPage() {
             </p>
           </div>
           <div className="flex items-center">
-            <Link href={"/customer/edit-profile"}>
-              <Button variant={"outline"} >Edit Profile</Button>
-            </Link>
+            
           </div>
         </CardHeader>
 

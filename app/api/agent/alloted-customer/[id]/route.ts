@@ -92,3 +92,37 @@ export async function PUT(
     )
   }
 }
+
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params // ✅ FIX (same as GET/PUT)
+
+    await client.connect()
+    const db = client.db("maindatabase")
+    const collection = db.collection("allotedcustomers")
+
+    const result = await collection.deleteOne({
+      customer: new ObjectId(id),
+    })
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { message: "Alloted customer not found" },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({
+      message: "Allotment deleted successfully",
+    })
+  } catch (err) {
+    return NextResponse.json(
+      { message: "Delete failed" },
+      { status: 500 }
+    )
+  }
+}
