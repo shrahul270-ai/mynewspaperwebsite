@@ -55,7 +55,13 @@ export default function CustomerAgentPage() {
   if (!agent) {
     return (
       <div className="p-6 text-muted-foreground">
+        <div className="div text-center">
         No agent assigned yet
+        </div>
+        <div className="flex justify-center">
+          <Button><Link href="/customer/select-agent">Choose Your Agent</Link></Button>
+        </div>
+
       </div>
     )
   }
