@@ -47,6 +47,14 @@ export default function AdminLayout({
           <Button variant="ghost" className="justify-start" asChild>
             <Link href="/admin/customers">Customers</Link>
           </Button>
+
+          <Separator />
+
+          <div className="my-2"></div>
+
+          <Button variant="destructive"  className="justify-start" asChild>
+            <a href="/api/signout">Log out</a>
+          </Button>
         </nav>
       </aside>
 
