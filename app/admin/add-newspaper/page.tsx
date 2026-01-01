@@ -115,10 +115,10 @@ export default function AddAgentNewspaper() {
 
             {/* Price */}
             <div className="space-y-2">
-              <Label>Monthly Price (₹)</Label>
+              <Label>One Item Price (₹)</Label>
               <Input
                 type="number"
-                placeholder="Eg. 120"
+                placeholder="Eg. 4"
                 value={form.price}
                 onChange={(e) =>
                   handleChange("price", e.target.value)
