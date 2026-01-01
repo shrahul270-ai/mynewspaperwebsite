@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "../ui/button"
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog"
 
 export interface HokerProfile {
   id: number
@@ -37,7 +38,7 @@ export interface HokerProfile {
 export default async function AgentHokers() {
   // ✅ Agent ID from headers
   const agentId = (await headers()).get("ID")
-  
+
 
   if (!agentId) {
     return <div className="text-red-500">Agent ID missing</div>
@@ -50,25 +51,25 @@ export default async function AgentHokers() {
   const db = client.db("maindatabase")
   const hokers = await db
     .collection<HokerProfile>("hokers")
-    .find({ agent : new ObjectId(agentId) })
+    .find({ agent: new ObjectId(agentId) })
     .sort({ created_at: -1 })
     .toArray()
 
-    // console.log(agentId + ":" + hokers[0])
+  // console.log(agentId + ":" + hokers[0])
 
   await client.close()
 
   return (
     <div className="space-y-4">
-        <div className="flex justify-between">
+      <div className="flex justify-between">
 
-      <h3 className="text-lg font-semibold">
-        Agent #{agentId} Hokers
-      </h3>
-      <a href="/agent/add-hocker">
-      <Button >Add Hocker</Button>
-      </a>
-        </div>
+        <h3 className="text-lg font-semibold">
+          Agent #{agentId} Hokers
+        </h3>
+        <a href="/agent/add-hocker">
+          <Button >Add Hocker</Button>
+        </a>
+      </div>
 
       <div className="rounded-xl border">
         <Table>
@@ -99,12 +100,26 @@ export default async function AgentHokers() {
                 <TableCell>{index + 1}</TableCell>
 
                 <TableCell className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={hoker.photo || ""} />
-                    <AvatarFallback>
-                      {hoker.full_name[0]}
-                    </AvatarFallback>
-                  </Avatar>
+                  <Dialog>
+                    {/* 👉 Avatar clickable */}
+                    <DialogTrigger asChild>
+                      <Avatar className="cursor-pointer">
+                        <AvatarImage src={hoker.photo || ""} />
+                        <AvatarFallback>
+                          {hoker.full_name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                    </DialogTrigger>
+
+                    {/* 👉 Modal */}
+                    <DialogContent className="max-w-md p-0 overflow-hidden">
+                      <img
+                        src={hoker.photo || ""}
+                        alt={hoker.full_name}
+                        className="w-full h-auto object-contain"
+                      />
+                    </DialogContent>
+                  </Dialog>
 
                   <div>
                     <div className="font-medium">{hoker.full_name}</div>
