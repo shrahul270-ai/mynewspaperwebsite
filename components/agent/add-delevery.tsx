@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 interface Hoker {
   _id: string
   full_name: string
+  email: string
 }
 
 interface Newspaper {
@@ -62,25 +64,30 @@ export default function DeliveryPage() {
 
   useEffect(() => {
     if (!customerId) {
+      toast.error("ग्राहक की जानकारी नहीं मिली")
       router.replace("/agent/customers")
       return
     }
 
     const load = async () => {
-      const res = await fetch(
-        `/api/agent/hokers/delivery/get?id=${customerId}`
-      )
-      const data = await res.json()
+      try {
+        const res = await fetch(
+          `/api/agent/hokers/delivery/get?id=${customerId}`
+        )
+        const data = await res.json()
 
-      if (!data.success) {
-        alert(data.message)
-        router.replace("/agent/customers")
-        return
+        if (!data.success) {
+          toast.error(data.message || "डेटा लोड नहीं हो पाया")
+          router.replace("/agent/customers")
+          return
+        }
+
+        setHokers(data.hokers || [])
+        setNewspapers(data.newspapers || [])
+        setBooklets(data.booklets || [])
+      } catch {
+        toast.error("सर्वर से कनेक्ट नहीं हो पाया")
       }
-
-      setHokers(data.hokers || [])
-      setNewspapers(data.newspapers || [])
-      setBooklets(data.booklets || [])
     }
 
     load()
@@ -90,7 +97,7 @@ export default function DeliveryPage() {
 
   const handleSubmit = async () => {
     if (!selectedHoker || !date) {
-      alert("Hoker and Date required")
+      toast.warning("हॉकर और तारीख चुनना ज़रूरी है")
       return
     }
 
@@ -112,36 +119,59 @@ export default function DeliveryPage() {
 
     setSaving(true)
 
-    const res = await fetch("/api/agent/hokers/delivery/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customerId,
-        hokerId: selectedHoker,
-        date,
-        newspapers: selectedNewspapers,
-        booklets: selectedBooklets,
-        extra: extra.qty > 0 ? extra : null,
-        remarks,
-      }),
-    })
+    try {
+      const res = await fetch("/api/agent/hokers/delivery/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId,
+          hokerId: selectedHoker,
+          date,
+          newspapers: selectedNewspapers,
+          booklets: selectedBooklets,
+          extra: extra.qty > 0 ? extra : null,
+          remarks,
+        }),
+      })
 
-    const data = await res.json()
-    setSaving(false)
+      const data = await res.json()
 
-    if (!data.success) {
-      alert(data.message)
-      return
+      if (!data.success) {
+        toast.error(data.message || "डिलीवरी सेव नहीं हो पाई")
+        return
+      }
+
+      toast.success("डिलीवरी सफलतापूर्वक सेव हो गई ✅", {
+        description: "आपको वापस ले जाया जा रहा है",
+      })
+
+      router.back()
+    } catch {
+      toast.error("कुछ गड़बड़ हो गई, दोबारा कोशिश करें")
+    } finally {
+      setSaving(false)
     }
-
-    alert("Delivery saved ✅")
-    router.back()
   }
 
   /* ================= UI ================= */
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+
+      {/* ================= GUIDE ================= */}
+      <Card className="bg-muted">
+        <CardHeader>
+          <CardTitle>📢 डिलीवरी भरने की जानकारी</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>👉 सबसे पहले हॉकर चुनें जो डिलीवरी करेगा।</p>
+          <p>👉 उसके बाद डिलीवरी की तारीख चुनें।</p>
+          <p>👉 हर अख़बार और पुस्तिका की सही संख्या चुनें।</p>
+          <p>👉 अगर कोई अतिरिक्त डिलीवरी है, तो उसका कारण और संख्या लिखें।</p>
+          <p>👉 अंत में “Save Delivery” बटन दबाएँ।</p>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>🛵 Delivery Entry</CardTitle>
@@ -149,25 +179,32 @@ export default function DeliveryPage() {
 
         <CardContent className="space-y-6">
           {/* Hoker */}
-          <Select value={selectedHoker} onValueChange={setSelectedHoker}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Hoker" />
-            </SelectTrigger>
-            <SelectContent>
-              {hokers.map(h => (
-                <SelectItem key={h._id} value={h._id}>
-                  {h.full_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div>
+            <Label>Hoker</Label>
+            <Select value={selectedHoker} onValueChange={setSelectedHoker}>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select Hoker" />
+              </SelectTrigger>
+              <SelectContent>
+                {hokers.map(h => (
+                  <SelectItem key={h._id} value={h._id}>
+                    {h.full_name} ({h.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Date */}
-          <Input
-            type="date"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-          />
+          <div>
+            <Label>Date</Label>
+            <Input
+              type="date"
+              className="mt-2"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+            />
+          </div>
 
           {/* Newspapers */}
           <div>
@@ -242,10 +279,14 @@ export default function DeliveryPage() {
           </div>
 
           {/* Remarks */}
-          <Textarea
-            placeholder="Remarks"
-            onChange={e => setRemarks(e.target.value)}
-          />
+          <div>
+            <Label>Remarks</Label>
+            <Textarea
+              className="mt-2"
+              placeholder="Remarks"
+              onChange={e => setRemarks(e.target.value)}
+            />
+          </div>
 
           <Button
             onClick={handleSubmit}
