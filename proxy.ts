@@ -15,7 +15,7 @@ interface JWT {
 // This function can be marked `async` if using `await` inside
 export async function proxy(request: NextRequest) {
   console.warn(request.url)
-  console.log("I am middleware ")
+  // console.log("I am middleware ")
   const ck = request.cookies
   const token = ck.get("token")?.value
   const secrate = process.env.JWT_SECRET!;
@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest) {
     decoded = await jwt.verify(token, secrate) as JWT
     const role = await decoded.role
 
-    console.log(decoded)
+    // console.log(decoded)
 
     if (role == "admin") {
       if(dashboard != "admin"){
