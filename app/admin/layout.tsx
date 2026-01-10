@@ -54,6 +54,10 @@ export default function AdminLayout({
 
           <Separator />
 
+          <Button variant="ghost" className="justify-start" asChild>
+            <Link href="/admin/db">Database</Link>
+          </Button>
+
           <div className="my-2"></div>
 
           <Button variant="destructive"  className="justify-start" asChild>
