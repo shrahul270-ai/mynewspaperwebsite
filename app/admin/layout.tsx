@@ -48,6 +48,10 @@ export default function AdminLayout({
             <Link href="/admin/customers">Customers</Link>
           </Button>
 
+           <Button variant="ghost" className="justify-start" asChild>
+            <Link href="/admin/hokers">Hokers</Link>
+          </Button>
+
           <Separator />
 
           <div className="my-2"></div>

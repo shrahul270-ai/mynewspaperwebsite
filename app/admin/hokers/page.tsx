@@ -11,22 +11,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { AgentsGuide } from "./Guid"
+import { HokerAdminGuide } from "./Guid"
 
 /* ================= TYPES ================= */
 
-interface Agent {
+interface Hoker {
   _id: string
   full_name: string
-  email: string
   mobile: string
-  agency_name: string
+  email: string
+  address: string
+  state: string
+  district: string
+  tehsil: string
+  village: string
+  pincode: string
+  age: string
+  gender: "male" | "female" | "other"
   photo?: string
-  status: "pending" | "approved" | "rejected"
   created_at: string
 }
 
@@ -41,18 +46,16 @@ const client = new MongoClient(process.env.MONGODB_URI!)
 
 /* ================= PAGE ================= */
 
-export default async function AdminAgentsPage({
+export default async function AdminHokersPage({
   searchParams,
 }: {
   searchParams?: Promise<{ q?: string }>
 }) {
-  /* 🔐 AUTH — cookies() IS A PROMISE */
+  /* 🔐 AUTH */
   const cookieStore = await cookies()
   const token = cookieStore.get("token")?.value
 
-  if (!token) {
-    return <div className="p-6 text-red-500">Unauthorized</div>
-  }
+  if (!token) return <div className="p-6 text-red-500">Unauthorized</div>
 
   let decoded: AdminJwtPayload
   try {
@@ -68,7 +71,7 @@ export default async function AdminAgentsPage({
     return <div className="p-6 text-red-500">Forbidden</div>
   }
 
-  /* 🔍 SEARCH — searchParams IS A PROMISE */
+  /* 🔍 SEARCH */
   const resolvedSearchParams = await searchParams
   const search = resolvedSearchParams?.q?.trim() || ""
 
@@ -78,6 +81,7 @@ export default async function AdminAgentsPage({
           { full_name: { $regex: search, $options: "i" } },
           { email: { $regex: search, $options: "i" } },
           { mobile: { $regex: search, $options: "i" } },
+          { village: { $regex: search, $options: "i" } },
         ],
       }
     : {}
@@ -85,81 +89,86 @@ export default async function AdminAgentsPage({
   /* 🗄️ DB */
   await client.connect()
   const db = client.db("maindatabase")
-  const agentsCol = db.collection("agents")
+  const hokersCol = db.collection("hokers")
 
-  const agents = (await agentsCol
-    .find(query, { projection: { password_hash: 0 } })
+  const hokers = (await hokersCol
+    .find(query)
     .sort({ created_at: -1 })
-    .toArray()) as unknown as Agent[]
+    .toArray()) as unknown as Hoker[]
 
   /* ================= UI ================= */
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Agents</h1>
+      <h1 className="text-2xl font-bold">Hokers</h1>
 
-      {/* GUIDE */}
-      <AgentsGuide />
+      {/* ✅ GUIDE */}
+     <HokerAdminGuide />
 
-      {/* SEARCH */}
+      {/* 🔍 SEARCH */}
       <form className="flex gap-2 max-w-sm">
         <input
           name="q"
           defaultValue={search}
-          placeholder="Search by name, email or mobile..."
+          placeholder="Search by name, mobile, email..."
           className="w-full rounded-md border px-3 py-2 text-sm"
         />
         <Button size="sm">Search</Button>
       </form>
 
-      {/* TABLE */}
+      {/* 📋 TABLE */}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Agent</TableHead>
-            <TableHead>Agency</TableHead>
+            <TableHead>Hoker</TableHead>
             <TableHead>Mobile</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Gender</TableHead>
+            <TableHead>Location</TableHead>
             <TableHead>Joined</TableHead>
             <TableHead className="text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {agents.length === 0 && (
+          {hokers.length === 0 && (
             <TableRow>
               <TableCell
                 colSpan={6}
                 className="text-center text-muted-foreground"
               >
-                No agents found
+                No hokers found
                 {search && <> for "<b>{search}</b>"</>}
               </TableCell>
             </TableRow>
           )}
 
-          {agents.map((agent) => (
-            <TableRow key={agent._id}>
+          {hokers.map((hoker) => (
+            <TableRow key={hoker._id}>
+              {/* HOKER */}
               <TableCell className="flex items-center gap-3">
                 <Dialog>
                   <DialogTrigger asChild>
                     <div className="cursor-pointer">
                       <Avatar className="h-10 w-10">
-                        {agent.photo && (
-                          <AvatarImage src={agent.photo} />
+                        {hoker.photo && (
+                          <AvatarImage src={hoker.photo} />
                         )}
                         <AvatarFallback>
-                          {agent.full_name[0].toUpperCase()}
+                          {hoker.full_name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                   </DialogTrigger>
 
                   <DialogContent className="max-w-md p-0 overflow-hidden">
-                    {agent.photo ? (
+                    {hoker.photo ? (
                       <img
-                        src={agent.photo}
-                        alt={agent.full_name}
+                        src={hoker.photo}
+                        alt={hoker.full_name}
                         className="w-full h-auto object-contain"
                       />
                     ) : (
@@ -171,36 +180,29 @@ export default async function AdminAgentsPage({
                 </Dialog>
 
                 <div>
-                  <p className="font-medium">{agent.full_name}</p>
+                  <p className="font-medium">{hoker.full_name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {agent.email}
+                    {hoker.email}
                   </p>
                 </div>
               </TableCell>
 
-              <TableCell>{agent.agency_name}</TableCell>
-              <TableCell>{agent.mobile}</TableCell>
+              <TableCell>{hoker.mobile}</TableCell>
 
-              <TableCell>
-                <Badge
-                  variant={
-                    agent.status === "approved"
-                      ? "default"
-                      : agent.status === "pending"
-                      ? "secondary"
-                      : "destructive"
-                  }
-                >
-                  {agent.status.toUpperCase()}
-                </Badge>
+              <TableCell className="capitalize">
+                {hoker.gender}
               </TableCell>
 
               <TableCell>
-                {new Date(agent.created_at).toLocaleDateString()}
+                {hoker.village}, {hoker.district}
+              </TableCell>
+
+              <TableCell>
+                {new Date(hoker.created_at).toLocaleDateString()}
               </TableCell>
 
               <TableCell className="text-right">
-                <Link href={`/admin/agents/${agent._id}`}>
+                <Link href={`/admin/hokers/${hoker._id}`}>
                   <Button size="sm" variant="outline">
                     Edit/View
                   </Button>
@@ -213,7 +215,3 @@ export default async function AdminAgentsPage({
     </div>
   )
 }
-
-
-
-
