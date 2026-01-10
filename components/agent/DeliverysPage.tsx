@@ -11,6 +11,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 /* ================= TYPES ================= */
 
@@ -31,6 +37,9 @@ export default function AgentAllDeliveriesPage() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+
+  const [selectedDelivery, setSelectedDelivery] =
+    useState<Delivery | null>(null)
 
   /* ================= FETCH ================= */
 
@@ -60,19 +69,17 @@ export default function AgentAllDeliveriesPage() {
     fetchDeliveries()
   }, [])
 
-  /* ================= HELPERS (SAFE) ================= */
+  /* ================= HELPERS ================= */
 
-  const totalNewspapers = (n?: { qty?: number }[]) => {
-    if (!Array.isArray(n)) return 0
-    return n.reduce((sum, i) => sum + Number(i?.qty || 0), 0)
-  }
+  const totalNewspapers = (n?: { qty?: number }[]) =>
+    Array.isArray(n)
+      ? n.reduce((sum, i) => sum + Number(i?.qty || 0), 0)
+      : 0
 
-  const totalBooklets = (b?: { qty?: number }[]) => {
-    if (!Array.isArray(b)) return 0
-    return b.reduce((sum, i) => sum + Number(i?.qty || 0), 0)
-  }
-
-  /* ================= PRINT ================= */
+  const totalBooklets = (b?: { qty?: number }[]) =>
+    Array.isArray(b)
+      ? b.reduce((sum, i) => sum + Number(i?.qty || 0), 0)
+      : 0
 
   const handlePrint = () => window.print()
 
@@ -82,59 +89,104 @@ export default function AgentAllDeliveriesPage() {
   if (error) return <div className="p-6 text-red-500">{error}</div>
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 md:p-6 space-y-6">
+
+      {/* ================= GUIDE ================= */}
+      <Card className="bg-muted">
+        <CardHeader>
+          <CardTitle>📢 डिलीवरी की जानकारी</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>👉 किसी भी डिलीवरी पर क्लिक करने से पूरी जानकारी दिखाई देगी।</p>
+          <p>👉 हर पंक्ति एक दिन की डिलीवरी को दर्शाती है।</p>
+          <p>👉 Print Report बटन से पूरी सूची प्रिंट की जा सकती है।</p>
+        </CardContent>
+      </Card>
+
+      {/* ================= TABLE ================= */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle>📦 All Deliveries</CardTitle>
-          <Button onClick={handlePrint}>🖨 Print Report</Button>
+          <Button onClick={handlePrint} className="w-full sm:w-auto">
+            🖨 Print Report
+          </Button>
         </CardHeader>
 
         <CardContent>
           {deliveries.length === 0 ? (
-            <div className="text-center text-gray-500 py-10">
-              No deliveries found
+            <div className="text-center text-muted-foreground py-10">
+              No deliveries found.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Hoker</TableHead>
-                  <TableHead>🗞 Newspaper</TableHead>
-                  <TableHead>📘 Booklet</TableHead>
-                  <TableHead>➕ Extra</TableHead>
-                  <TableHead>Remarks</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {deliveries.map(d => (
-                  <TableRow key={d._id}>
-                    <TableCell>
-                      {d.date
-                        ? new Date(d.date).toLocaleDateString()
-                        : "-"}
-                    </TableCell>
-                    <TableCell>{d.customerName || "-"}</TableCell>
-                    <TableCell>{d.hokerName || "-"}</TableCell>
-                    <TableCell>
-                      {totalNewspapers(d.newspapers)}
-                    </TableCell>
-                    <TableCell>
-                      {totalBooklets(d.booklets)}
-                    </TableCell>
-                    <TableCell>{d.extra?.qty || 0}</TableCell>
-                    <TableCell>{d.remarks || "-"}</TableCell>
+            <div className="w-full overflow-x-auto">
+              <Table className="min-w-[900px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Hoker</TableHead>
+                    <TableHead>🗞 Newspaper</TableHead>
+                    <TableHead>📘 Booklet</TableHead>
+                    <TableHead>➕ Extra</TableHead>
+                    <TableHead>Remarks</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+
+                <TableBody>
+                  {deliveries.map(d => (
+                    <TableRow
+                      key={d._id}
+                      className="cursor-pointer hover:bg-muted"
+                      onClick={() => setSelectedDelivery(d)}
+                    >
+                      <TableCell>
+                        {d.date
+                          ? new Date(d.date).toLocaleDateString()
+                          : "-"}
+                      </TableCell>
+
+                      <TableCell>{d.customerName || "-"}</TableCell>
+                      <TableCell>{d.hokerName || "-"}</TableCell>
+                      <TableCell>{totalNewspapers(d.newspapers)}</TableCell>
+                      <TableCell>{totalBooklets(d.booklets)}</TableCell>
+                      <TableCell>{d.extra?.qty || 0}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">
+                        {d.remarks || "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
 
-      {/* 🖨 Print CSS */}
+      {/* ================= DETAILS DIALOG ================= */}
+      <Dialog
+        open={!!selectedDelivery}
+        onOpenChange={() => setSelectedDelivery(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>📄 डिलीवरी विवरण</DialogTitle>
+          </DialogHeader>
+
+          {selectedDelivery && (
+            <div className="space-y-2 text-sm">
+              <p><b>तारीख:</b> {new Date(selectedDelivery.date).toLocaleDateString()}</p>
+              <p><b>ग्राहक:</b> {selectedDelivery.customerName}</p>
+              <p><b>हॉकर:</b> {selectedDelivery.hokerName}</p>
+              <p><b>अख़बार:</b> {totalNewspapers(selectedDelivery.newspapers)}</p>
+              <p><b>पुस्तिका:</b> {totalBooklets(selectedDelivery.booklets)}</p>
+              <p><b>अतिरिक्त:</b> {selectedDelivery.extra?.qty || 0}</p>
+              <p><b>टिप्पणी:</b> {selectedDelivery.remarks || "कोई नहीं"}</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= PRINT STYLE ================= */}
       <style jsx global>{`
         @media print {
           button {

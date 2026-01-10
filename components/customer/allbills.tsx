@@ -44,6 +44,32 @@ export default function CustomerBillsPage() {
 
   return (
     <div className="p-6 space-y-6">
+
+      {/* ================= HINDI INSTRUCTIONS ================= */}
+      <Card className="bg-muted">
+        <CardHeader>
+          <CardTitle>📢 बिल से जुड़ी जानकारी</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            👉 इस पृष्ठ पर आपके हर महीने के बिल दिखाए जाते हैं।
+          </p>
+          <p>
+            👉 हर बिल में आपके लिए आए हुए समाचार पत्र और पुस्तिकाओं का हिसाब दिया गया है।
+          </p>
+          <p>
+            👉 <b>Paid</b> का मतलब है कि बिल का भुगतान हो चुका है।
+          </p>
+          <p>
+            👉 <b>Unpaid</b> या <b>Pending</b> का मतलब है कि बिल अभी बाकी है।
+          </p>
+          <p>
+            👉 अगर बिल बाकी है, तो नीचे दिए गए <b>“Pay Now”</b> बटन से भुगतान करें।
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* ================= PAGE TITLE ================= */}
       <h1 className="text-2xl font-bold">My Bills</h1>
 
       {bills.length === 0 && (
@@ -70,7 +96,6 @@ export default function CustomerBillsPage() {
             >
               {bill.status.toUpperCase()}
             </Badge>
-
           </CardHeader>
 
           <CardContent className="space-y-3">
@@ -97,11 +122,9 @@ export default function CustomerBillsPage() {
 
             {/* Pay Button */}
             {(bill.status === "unpaid" || bill.status === "pending") && (
-              <Button
-                className="w-full"                
-              >
+              <Button className="w-full">
                 <Link href={`/customer/pay/${bill._id}`}>
-                Pay Now
+                  Pay Now
                 </Link>
               </Button>
             )}

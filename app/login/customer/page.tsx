@@ -3,48 +3,77 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Newspaper, Loader2, ChevronRight } from "lucide-react";
-import { toast } from "sonner"; // Import from sonner
+import {
+  Newspaper,
+  Loader2,
+  ChevronRight,
+  User,
+  Briefcase,
+  Truck,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+
+type Step = "choice" | "loginRole" | "login" | "signup";
+type Role = "customer" | "agent" | "hoker";
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const [step, setStep] = useState<Step>("choice");
+  const [role, setRole] = useState<Role | null>(null);
+  const [selectedLoginRole, setSelectedLoginRole] = useState<Role | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Handle login role selection
+  const handleLoginRoleSelect = (selectedRole: Role) => {
+    if (selectedRole === "customer") {
+      setRole("customer");
+      setStep("login");
+    } else {
+      // For agent or hoker, redirect to specific login pages
+      router.push(`/login/${selectedRole}`);
+    }
+  };
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!role) return;
+
     setIsLoading(true);
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(e.currentTarget);
     const email = formData.get("email");
     const password = formData.get("password");
 
     try {
-      const response = await fetch("/api/customers/login", {
+      const res = await fetch(`/api/${role}s/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Invalid credentials");
 
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials");
-      }
-
-      // Sonner Success Message
-      toast.success("Welcome back!", {
-        description: "Redirecting to your delivery dashboard...",
+      toast.success("Login successful", {
+        description: "Dashboard par redirect ho raha hai",
       });
 
-      router.push("/customer/profile");
+      router.push(`/${role}/profile`);
       router.refresh();
     } catch (err: any) {
-      // Sonner Error Message
-      toast.error("Authentication Failed", {
+      toast.error("Login Failed", {
         description: err.message,
       });
     } finally {
@@ -53,146 +82,189 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full overflow-hidden bg-white">
-      {/* Visual Section (Left) */}
-      <div className="relative hidden w-1/2 lg:block bg-zinc-950">
-        <img
-          src="https://picsum.photos/1920/1080"
-          alt="Newspaper background"
-          className="absolute inset-0 h-full w-full object-cover opacity-40 contrast-125 transition-opacity duration-700"
-          loading="eager"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
+    <>
+      {/* ================= MODAL ================= */}
+      <Dialog
+        open={step !== "login"}
+        onOpenChange={(open) => {
+          if (!open) setStep("login");
+        }}
+      >
+        <DialogContent className="max-w-sm rounded-none bg-background text-foreground">
 
-        <div className="relative z-10 flex h-full flex-col justify-between p-12 text-white">
-          <Link href="/" className="flex items-center gap-2 w-fit">
-            <Newspaper className="h-8 w-8 text-primary-foreground" />
-            <span className="text-2xl font-serif font-bold tracking-tighter italic leading-none">The Daily Press</span>
-          </Link>
+          {/* STEP 1 - CHOICE (Login ya Signup) */}
+          {step === "choice" && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-center">
+                  Welcome 👋 <br />
+                  <span className="text-base font-normal">स्वागत है</span>
+                </DialogTitle>
+                <DialogDescription className="text-center">
+                  क्या आप पहले से पंजीकृत हैं?
+                </DialogDescription>
+              </DialogHeader>
 
-          <div className="space-y-6">
-            <h2 className="text-6xl font-serif font-bold leading-[1.1] tracking-tight">
-              Quality journalism, <br /> delivered daily.
-            </h2>
-            <p className="max-w-md text-lg text-zinc-400 font-light leading-relaxed">
-              Join thousands of readers who start their morning with the most trusted reporting in the city.
-            </p>
-          </div>
-        </div>
-      </div>
+              <div className="space-y-3 pt-4">
+                <Button onClick={() => setStep("loginRole")} className="w-full">
+                  Login / लॉगिन करें
+                </Button>
 
-      {/* Form Section (Right) */}
-      <div className="flex w-full items-center justify-center p-8 lg:w-1/2">
-        <div className="w-full max-w-[380px] space-y-10">
-          <div className="space-y-3">
-            <h1 className="text-4xl font-serif font-bold tracking-tight text-zinc-900">Sign In</h1>
-            <p className="text-sm text-zinc-500">
-              Welcome back! Please enter your details to manage your delivery.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs uppercase tracking-widest font-bold text-zinc-500">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                placeholder="name@example.com"
-                required
-                disabled={isLoading}
-                className="h-12 text-black border-zinc-200 focus-visible:ring-1 focus-visible:ring-zinc-950 rounded-none bg-zinc-50/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-xs uppercase tracking-widest font-bold text-zinc-500">
-                  Password
-                </Label>
-                <Link href="#" className="text-xs font-medium text-zinc-400 hover:text-zinc-950 underline underline-offset-4 transition-colors">
-                  Forgot password?
-                </Link>
+                <Button
+                  variant="outline"
+                  onClick={() => setStep("signup")}
+                  className="w-full"
+                >
+                  नया खाता बनाएं
+                </Button>
               </div>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                disabled={isLoading}
-                className="h-12 text-black border-zinc-200 focus-visible:ring-1 focus-visible:ring-zinc-950 rounded-none bg-zinc-50/50"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full h-12 bg-zinc-900 text-white hover:bg-zinc-800 transition-all rounded-none font-bold text-base"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                "Continue to Login"
-              )}
-            </Button>
-          </form>
+            </>
+          )}
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-zinc-100" />
+          {/* STEP 2 – LOGIN ROLE SELECTION */}
+          {step === "loginRole" && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-center">
+                  आप कौन हैं?
+                </DialogTitle>
+                <DialogDescription className="text-center">
+                  अपनी भूमिका चुनें
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-3 pt-4">
+                <Button
+                  className="w-full flex gap-2 justify-start"
+                  onClick={() => handleLoginRoleSelect("customer")}
+                >
+                  <User className="h-4 w-4" /> Customer / ग्राहक
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full flex gap-2 justify-start"
+                  onClick={() => handleLoginRoleSelect("agent")}
+                >
+                  <Briefcase className="h-4 w-4" /> Agent / एजेंट
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full flex gap-2 justify-start"
+                  onClick={() => handleLoginRoleSelect("hoker")}
+                >
+                  <Truck className="h-4 w-4" /> Hoker / होकर
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep("choice")}
+                  className="w-full"
+                >
+                  ← वापस जाएँ
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* STEP 3 – SIGNUP ROLE */}
+          {step === "signup" && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-center">
+                  खाता किसके लिए?
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-3 pt-4">
+                <Button
+                  className="w-full"
+                  onClick={() => router.push("/signup/customer")}
+                >
+                  Customer Account
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push("/signup/agent")}
+                >
+                  Agent Account
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep("choice")}
+                  className="w-full"
+                >
+                  ← वापस जाएँ
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= LOGIN FORM (ONLY FOR CUSTOMER) ================= */}
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        {step === "login" && role === "customer" && (
+          <div className="w-full max-w-[380px] space-y-6 p-6">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold">
+                CUSTOMER LOGIN
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                ग्राहक लॉगिन
+              </p>
             </div>
-            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
-              <span className="bg-white px-4 text-zinc-400">Secure Access</span>
-            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label>Email</Label>
+                <Input name="email" type="email" required />
+              </div>
+
+              <div>
+                <Label>Password</Label>
+                <Input type="password" name="password" required />
+              </div>
+
+              <Button className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Logging in...
+                  </>
+                ) : (
+                  "Login / लॉगिन करें"
+                )}
+              </Button>
+            </form>
+
+            <p className="text-center text-sm text-muted-foreground">
+              नया ग्राहक?{" "}
+              <button
+                onClick={() => router.push("/signup/customer")}
+                className="underline font-semibold"
+              >
+                खाता बनाएं
+              </button>
+            </p>
+
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setStep("loginRole");
+                setRole(null);
+              }}
+              className="w-full"
+            >
+              ← दूसरी भूमिका चुनें
+            </Button>
           </div>
-
-          <Link href="/login/hoker" >
-
-            <Button
-              variant="default"
-              
-              type="button"
-              className="w-full h-12 rounded-none font-semibold hover:text-black text-white bg-red-500"
-            >
-              I am Hoker
-            </Button>
-          </Link>
-
-          <div className="my-3"></div>
-
-
-          <Link href="/login/agent" >
-
-            <Button
-              variant="default"
-              type="button"
-              className="w-full h-12 rounded-none font-semibold transition-colors "
-            >
-              I am Agent
-            </Button>
-          </Link>
-
-
-          <div className="my-2"></div>
-
-          <Button
-            variant="outline"
-            type="button"
-            className="w-full h-12 border-zinc-200 hover:bg-sky-500 hover:text-white rounded-none font-semibold transition-colors"
-          >
-            Sign in with Google
-          </Button>
-
-          <p className="text-center text-sm text-zinc-500 pt-4">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup/customer" className="font-bold text-zinc-950 hover:underline inline-flex items-center group">
-              Subscribe Now <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </p>
-        </div>
+        )}
       </div>
-    </div>
+    </>
   );
 }

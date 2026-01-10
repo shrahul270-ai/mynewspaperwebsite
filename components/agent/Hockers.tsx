@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "../ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export interface HokerProfile {
   id: number
@@ -36,15 +37,12 @@ export interface HokerProfile {
 }
 
 export default async function AgentHokers() {
-  // ✅ Agent ID from headers
   const agentId = (await headers()).get("ID")
-
 
   if (!agentId) {
     return <div className="text-red-500">Agent ID missing</div>
   }
 
-  // ✅ MongoDB Native (NO mongoose)
   const client = new MongoClient(process.env.MONGODB_URI!)
   await client.connect()
 
@@ -55,42 +53,67 @@ export default async function AgentHokers() {
     .sort({ created_at: -1 })
     .toArray()
 
-  // console.log(agentId + ":" + hokers[0])
-
   await client.close()
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between">
+    <div className="space-y-6">
 
+      {/* ================= GUIDES ================= */}
+      <Card className="bg-muted">
+        <CardHeader>
+          <CardTitle>📢 आवश्यक जानकारी</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            👉 इस पृष्ठ पर <b>सभी हॉकर्स नहीं</b>, बल्कि
+            <b> केवल वही हॉकर्स दिखाए गए हैं जो इस एजेंट से जुड़े हुए हैं।</b>
+          </p>
+          <p>
+            👉 किसी हॉकर की <b>तस्वीर पर क्लिक</b> करने से उसकी बड़ी फोटो दिखाई देगी।
+          </p>
+          <p>
+            👉 <b>Add Hocker</b> बटन से नए हॉकर को जोड़ा जा सकता है।
+          </p>
+          <p>
+            👉 <b>Edit</b> बटन से हॉकर की जानकारी बदली जा सकती है।
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* ================= HEADER ================= */}
+      <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">
-          Agent #{agentId} Hokers
+          इस एजेंट के हॉकर्स
         </h3>
+
         <a href="/agent/add-hocker">
-          <Button >Add Hocker</Button>
+          <Button>Add Hocker</Button>
         </a>
       </div>
 
+      {/* ================= TABLE ================= */}
       <div className="rounded-xl border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
-              <TableHead>Hoker</TableHead>
-              <TableHead>Mobile</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Age</TableHead>
-              <TableHead>Edit</TableHead>
-
+              <TableHead>हॉकर</TableHead>
+              <TableHead>मोबाइल</TableHead>
+              <TableHead>स्थान</TableHead>
+              <TableHead>लिंग</TableHead>
+              <TableHead>आयु</TableHead>
+              <TableHead>संपादन</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {hokers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  No hokers found
+                <TableCell
+                  colSpan={7}
+                  className="text-center text-muted-foreground"
+                >
+                  अभी इस एजेंट के लिए कोई हॉकर मौजूद नहीं है।
                 </TableCell>
               </TableRow>
             )}
@@ -101,7 +124,6 @@ export default async function AgentHokers() {
 
                 <TableCell className="flex items-center gap-3">
                   <Dialog>
-                    {/* 👉 Avatar clickable */}
                     <DialogTrigger asChild>
                       <Avatar className="cursor-pointer">
                         <AvatarImage src={hoker.photo || ""} />
@@ -111,7 +133,6 @@ export default async function AgentHokers() {
                       </Avatar>
                     </DialogTrigger>
 
-                    {/* 👉 Modal */}
                     <DialogContent className="max-w-md p-0 overflow-hidden">
                       <img
                         src={hoker.photo || ""}
@@ -144,7 +165,12 @@ export default async function AgentHokers() {
                 </TableCell>
 
                 <TableCell>{hoker.age}</TableCell>
-                <TableCell><a href={`/agent/edit/hocker/${hoker._id}`}> <Button value="secondary" >Edit</Button></a></TableCell>
+
+                <TableCell>
+                  <a href={`/agent/edit/hocker/${hoker._id}`}>
+                    <Button variant="secondary">Edit</Button>
+                  </a>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

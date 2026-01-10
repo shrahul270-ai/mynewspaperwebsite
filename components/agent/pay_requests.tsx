@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
+/* ================= TYPES ================= */
+
 interface PayRequest {
   _id: string
   status: string
@@ -28,14 +30,15 @@ interface PayRequest {
   totalAmount: number
 }
 
+/* ================= PAGE ================= */
+
 export default function AgentPayRequestsPage() {
   const [requests, setRequests] = useState<PayRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-  /* =====================
-     Fetch Pay Requests
-  ===================== */
+  /* ================= FETCH ================= */
+
   const fetchRequests = async () => {
     try {
       const res = await fetch("/api/agent/pay-requests")
@@ -44,7 +47,7 @@ export default function AgentPayRequestsPage() {
       const data = await res.json()
       setRequests(data)
     } catch {
-      alert("Failed to load pay requests")
+      alert("Failed to load payment requests")
     } finally {
       setLoading(false)
     }
@@ -54,16 +57,15 @@ export default function AgentPayRequestsPage() {
     fetchRequests()
   }, [])
 
-  /* =====================
-     Accept / Reject Handler
-  ===================== */
+  /* ================= ACTION ================= */
+
   const handleAction = async (
     requestId: string,
     action: "accept" | "reject"
   ) => {
     const msg =
       action === "accept"
-        ? "Accept payment and mark bill as paid?"
+        ? "Accept payment and mark bill as PAID?"
         : "Reject this payment request?"
 
     if (!confirm(msg)) return
@@ -74,16 +76,13 @@ export default function AgentPayRequestsPage() {
       const res = await fetch("/api/agent/pay-requests/action", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          requestId,
-          action,
-        }),
+        body: JSON.stringify({ requestId, action }),
       })
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.message)
 
-      // remove request from list instantly (no reload)
+      // remove request instantly
       setRequests((prev) =>
         prev.filter((r) => r._id !== requestId)
       )
@@ -95,11 +94,41 @@ export default function AgentPayRequestsPage() {
   }
 
   if (loading) {
-    return <div className="p-6">Loading pay requests...</div>
+    return <div className="p-6">Loading payment requests...</div>
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4 space-y-4">
+    <div className="max-w-5xl mx-auto p-4 space-y-6">
+
+      {/* ================= GUIDE (HINDI) ================= */}
+      <Card className="bg-muted">
+        <CardHeader>
+          <CardTitle>📢 भुगतान अनुरोध की जानकारी</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            👉 इस पृष्ठ पर ग्राहकों द्वारा भेजे गए
+            <b> भुगतान अनुरोध</b> दिखाए जाते हैं।
+          </p>
+          <p>
+            👉 ग्राहक तब भुगतान अनुरोध भेजता है जब वह
+            बिल की राशि चुका देता है।
+          </p>
+          <p>
+            👉 <b>Accept and Mark Paid</b> दबाने से
+            बिल को <b>Paid</b> माना जाएगा।
+          </p>
+          <p>
+            👉 <b>Reject</b> करने पर भुगतान अनुरोध रद्द हो जाएगा।
+          </p>
+          <p>
+            ⚠️ ध्यान दें: एक बार Accept करने के बाद
+            भुगतान को वापस नहीं किया जा सकता।
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* ================= TITLE ================= */}
       <h1 className="text-2xl font-semibold">
         Payment Requests
       </h1>
@@ -157,7 +186,7 @@ export default function AgentPayRequestsPage() {
               >
                 {actionLoading === req._id
                   ? "Processing..."
-                  : "Accept"}
+                  : "Accept and Mark Paid"}
               </Button>
 
               <Button

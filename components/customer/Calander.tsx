@@ -3,8 +3,7 @@ import { cookies } from "next/headers"
 import jwt from "jsonwebtoken"
 import Link from "next/link"
 import { HokerDelivery } from "@/lib/models"
-
-// import { HokerDelivery } from "@/types/models"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface CustomerJwtPayload {
   customerId: string
@@ -115,9 +114,6 @@ export default async function CustomerCalendarPage({
   for (let i = 0; i < firstDay; i++) days.push(null)
   for (let d = 1; d <= daysInMonth; d++) days.push(d)
 
-  /* =====================
-     ⏮ ⏭ NAVIGATION
-  ===================== */
   const prevMonth = month === 1 ? 12 : month - 1
   const prevYear = month === 1 ? year - 1 : year
   const nextMonth = month === 12 ? 1 : month + 1
@@ -127,14 +123,28 @@ export default async function CustomerCalendarPage({
      🧱 UI
   ===================== */
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 p-4 bg-background text-foreground">
+
+      {/* ================= निर्देश ================= */}
+      <Card className="bg-muted">
+        <CardHeader>
+          <CardTitle>📅 कैलेंडर की जानकारी</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>👉 इस कैलेंडर में हर दिन की डिलीवरी दिखाई जाती है।</p>
+          <p>👉 हरे रंग का मतलब है कि उस दिन अख़बार या पुस्तिका आई थी।</p>
+          <p>👉 जिस दिन के चारों ओर गोला है, वह आज का दिन है।</p>
+          <p>👉 नीचे दिए गए आँकड़े पूरे महीने की जानकारी दिखाते हैं।</p>
+        </CardContent>
+      </Card>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <Link
           href={`/customer/calendar?month=${prevMonth}&year=${prevYear}`}
-          className="text-blue-600"
+          className="text-primary"
         >
-          ← Prev
+          ← Previous
         </Link>
 
         <h1 className="text-xl font-semibold">
@@ -143,7 +153,7 @@ export default async function CustomerCalendarPage({
 
         <Link
           href={`/customer/calendar?month=${nextMonth}&year=${nextYear}`}
-          className="text-blue-600"
+          className="text-primary"
         >
           Next →
         </Link>
@@ -152,7 +162,7 @@ export default async function CustomerCalendarPage({
       {/* Calendar */}
       <div className="grid grid-cols-7 gap-2 text-center">
         {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(day => (
-          <div key={day} className="font-medium text-gray-500">
+          <div key={day} className="font-medium text-muted-foreground">
             {day}
           </div>
         ))}
@@ -172,8 +182,8 @@ export default async function CustomerCalendarPage({
             <div
               key={idx}
               className={`h-12 rounded-lg flex items-center justify-center
-                ${delivered ? "bg-green-500 text-white" : "bg-gray-100"}
-                ${isToday ? "ring-2 ring-blue-500" : ""}
+                ${delivered ? "bg-green-500 text-white" : "bg-muted"}
+                ${isToday ? "ring-2 ring-primary" : ""}
               `}
             >
               {day}
@@ -184,34 +194,34 @@ export default async function CustomerCalendarPage({
 
       {/* Summary */}
       {deliveries.length > 0 && (
-        <div className="p-4 rounded-lg bg-blue-50">
-          <h3 className="font-medium mb-3">Delivery Summary</h3>
+        <div className="p-4 rounded-lg bg-muted">
+          <h3 className="font-medium mb-3">📊 डिलीवरी का सार</h3>
 
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-green-600">
                 {newspaperDeliveries}
               </div>
-              <p className="text-sm">Newspaper Days</p>
+              <p className="text-sm">Newspapers</p>
             </div>
 
             <div>
               <div className="text-2xl font-bold text-blue-600">
                 {bookletDeliveries}
               </div>
-              <p className="text-sm">Booklet Days</p>
+              <p className="text-sm">Booklets</p>
             </div>
 
             <div>
               <div className="text-2xl font-bold text-purple-600">
                 {extraDeliveries}
               </div>
-              <p className="text-sm">Extra Days</p>
+              <p className="text-sm">Extra Delievary</p>
             </div>
           </div>
 
           <p className="mt-3 text-center text-sm">
-            Total Delivery Days: {dateStatusMap.size}
+            कुल डिलीवरी वाले दिन: {dateStatusMap.size}
           </p>
         </div>
       )}
