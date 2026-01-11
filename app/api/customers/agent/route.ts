@@ -35,36 +35,50 @@ export async function GET() {
 
     const allotedCustomers = db.collection("allotedcustomers")
     const agents = db.collection("agents")
+    const customers = db.collection("customers")
+    const hokers = db.collection("hokers")
 
     /* 🔗 Find agentId from allotedcustomers */
     const allotment = await allotedCustomers.findOne({
       customer: new ObjectId(customerId),
+      is_active: true,
     })
 
     if (!allotment) {
       return NextResponse.json({
         success: true,
         agent: null,
-        message: "No agent alloted",
+        hoker: null,
+        message: "No agent allotted",
       })
     }
 
-    /* 👤 Fetch agent info */
-    const agent = await agents.findOne({
-      _id: new ObjectId(allotment.agent),
-    })
+    /* 👤 Fetch agent */
+    const agent = await agents.findOne(
+      { _id: new ObjectId(allotment.agent) },
+      { projection: { password_hash: 0 } }
+    )
 
-    if (!agent) {
-      return NextResponse.json({
-        success: true,
-        agent: null,
-        message: "Agent not found",
-      })
+    /* 👤 Fetch customer (for hokerId) */
+    const customer = await customers.findOne(
+      { _id: new ObjectId(customerId) },
+      { projection: { hoker: 1 } }
+    )
+
+    let hoker = null
+
+    /* 🧍 Fetch hoker (if exists) */
+    if (customer?.hoker && customer.hoker.length > 0) {
+      hoker = await hokers.findOne(
+        { _id: new ObjectId(customer.hoker[0]) },
+        { projection: { password_hash: 0 } }
+      )
     }
 
     return NextResponse.json({
       success: true,
       agent,
+      hoker,
     })
   } catch (err) {
     console.error(err)

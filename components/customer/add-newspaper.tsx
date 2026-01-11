@@ -1,33 +1,57 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+
+/* =====================
+   TYPES
+===================== */
 interface Item {
   _id: string
   name?: string
   title?: string
 }
 
+/* =====================
+   PAGE
+===================== */
 export default function CustomerAddNewspaper() {
+  const router = useRouter()
+
   const [newspapers, setNewspapers] = useState<Item[]>([])
   const [booklets, setBooklets] = useState<Item[]>([])
 
   const [selectedNewspapers, setSelectedNewspapers] = useState<string[]>([])
   const [selectedBooklets, setSelectedBooklets] = useState<string[]>([])
+
+  const [showIntroDialog, setShowIntroDialog] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   /* =====================
      FETCH (LIST + SAVED)
@@ -36,7 +60,6 @@ export default function CustomerAddNewspaper() {
     const fetchData = async () => {
       try {
         const res = await fetch("/api/customers/newspapers")
-
         if (!res.ok) throw new Error("Fetch failed")
 
         const data = await res.json()
@@ -44,11 +67,18 @@ export default function CustomerAddNewspaper() {
         setNewspapers(data.newspapers || [])
         setBooklets(data.booklets || [])
 
-        // ⭐ pre-selected
         setSelectedNewspapers(data.selectedNewspapers || [])
         setSelectedBooklets(data.selectedBooklets || [])
+
+        if (
+          (!data.selectedNewspapers || data.selectedNewspapers.length === 0) &&
+          (!data.selectedBooklets || data.selectedBooklets.length === 0)
+        ) {
+          setShowIntroDialog(true)
+        }
       } catch (err) {
-        console.error("Fetch error:", err)
+        console.error(err)
+        toast.error("डेटा लोड नहीं हो पाया")
       }
     }
 
@@ -78,10 +108,20 @@ export default function CustomerAddNewspaper() {
   }
 
   /* =====================
-     SAVE
+     SAVE + REDIRECT
   ===================== */
   const handleSubmit = async () => {
+    if (
+      selectedNewspapers.length === 0 &&
+      selectedBooklets.length === 0
+    ) {
+      toast.warning("कृपया कम से कम एक अख़बार या बुकलेट चुनें")
+      return
+    }
+
     try {
+      setSaving(true)
+
       const res = await fetch("/api/customers/newspapers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,13 +134,18 @@ export default function CustomerAddNewspaper() {
       const data = await res.json()
 
       if (!res.ok) {
-        alert(data.message || "Save failed")
+        toast.error(data.message || "सेव नहीं हो पाया")
         return
       }
 
-      alert("Saved successfully ✅")
+      toast.success("सब्सक्रिप्शन सेव हो गया 📰✅")
+
+      // 🔁 redirect after save
+      router.push("/customer/papers")
     } catch (err) {
-      alert("Something went wrong")
+      toast.error("कुछ गलत हो गया")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -138,6 +183,48 @@ export default function CustomerAddNewspaper() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
+      {/* =====================
+         INTRO DIALOG
+      ===================== */}
+      <Dialog open={showIntroDialog} onOpenChange={setShowIntroDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              📰 अख़बार सब्सक्रिप्शन सिस्टम
+            </DialogTitle>
+
+            <DialogDescription className="space-y-4 text-sm leading-relaxed">
+              <p>👋 <strong>स्वागत है!</strong></p>
+
+              <p>
+                🔁 यह एक <strong>सब्सक्रिप्शन आधारित सेवा</strong> है।
+                जो भी आप चुनेंगे, वही आपको रोज़ घर पर मिलेगा।
+              </p>
+
+              <ul className="list-disc pl-5 space-y-2">
+                <li>🗞️ चुने गए अख़बार रोज़ आएँगे</li>
+                <li>📘 बुकलेट्स आपकी पसंद से जुड़ेंगी</li>
+                <li>🚫 जो नहीं चुना, वह डिलीवर नहीं होगा</li>
+              </ul>
+
+              <p className="text-muted-foreground">
+                🔄 आप बाद में कभी भी बदलाव कर सकते हैं
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+
+          <Button
+            className="w-full"
+            onClick={() => setShowIntroDialog(false)}
+          >
+            ✅ समझ गया, चयन शुरू करें
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* =====================
+         MAIN CARD
+      ===================== */}
       <Card>
         <CardHeader>
           <CardTitle>Select Newspapers / Booklets</CardTitle>
@@ -146,12 +233,8 @@ export default function CustomerAddNewspaper() {
         <CardContent>
           <Tabs defaultValue="newspaper">
             <TabsList className="mb-4">
-              <TabsTrigger value="newspaper">
-                Newspapers
-              </TabsTrigger>
-              <TabsTrigger value="booklet">
-                Booklets
-              </TabsTrigger>
+              <TabsTrigger value="newspaper">Newspapers</TabsTrigger>
+              <TabsTrigger value="booklet">Booklets</TabsTrigger>
             </TabsList>
 
             <TabsContent value="newspaper">
@@ -171,8 +254,12 @@ export default function CustomerAddNewspaper() {
             </TabsContent>
           </Tabs>
 
-          <Button className="mt-6 w-full" onClick={handleSubmit}>
-            Save Selection
+          <Button
+            className="mt-6 w-full"
+            onClick={handleSubmit}
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save Selection"}
           </Button>
         </CardContent>
       </Card>
