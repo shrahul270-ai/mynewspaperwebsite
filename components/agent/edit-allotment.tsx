@@ -7,7 +7,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+
+/* ================= TYPES ================= */
 
 interface AllotedCustomer {
   PB: number
@@ -18,43 +33,52 @@ interface AllotedCustomer {
   is_active: boolean
 }
 
+interface Hoker {
+  _id: string
+  full_name: string
+  email: string
+  mobile: string
+  photo?: string
+}
+
+/* ================= PAGE ================= */
+
 export default function AgentEditAllotedCustomerPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const id = searchParams.get("id")
 
   const [form, setForm] = useState<AllotedCustomer | null>(null)
+  const [hokers, setHokers] = useState<Hoker[]>([])
+  const [selectedHoker, setSelectedHoker] = useState("")
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
-  /* =====================
-     Fetch Data
-  ===================== */
   useEffect(() => {
-    if (!id) {
-      alert("ID missing")
-      router.back()
-      return
-    }
+    if (!id) return router.back()
 
     const fetchData = async () => {
       try {
         const res = await fetch(`/api/agent/alloted-customer/${id}`)
-        if (!res.ok) throw new Error()
-
         const data = await res.json()
 
         setForm({
-          PB: data.PB ?? 0,
-          BH: data.BH ?? 0,
-          HT: data.HT ?? 0,
-          TIMES: data.TIMES ?? 0,
-          HINDU: data.HINDU ?? 0,
-          is_active: data.is_active ?? true,
+          PB: data.allotedCustomer?.PB ?? 0,
+          BH: data.allotedCustomer?.BH ?? 0,
+          HT: data.allotedCustomer?.HT ?? 0,
+          TIMES: data.allotedCustomer?.TIMES ?? 0,
+          HINDU: data.allotedCustomer?.HINDU ?? 0,
+          is_active: data.allotedCustomer?.is_active ?? true,
         })
+
+        setHokers(data.availableHokers || [])
+        setSelectedHoker(
+          data.customerHokers?.[0]?._id || ""
+        )
       } catch {
-        alert("Data load failed")
+        alert("Failed to load data")
         router.back()
       } finally {
         setLoading(false)
@@ -64,22 +88,19 @@ export default function AgentEditAllotedCustomerPage() {
     fetchData()
   }, [id, router])
 
-  /* =====================
-     Update
-  ===================== */
   const handleSave = async () => {
-    if (!form || !id) return
+    if (!form) return
     setSaving(true)
 
     try {
-      const res = await fetch(`/api/agent/alloted-customer/${id}`, {
+      await fetch(`/api/agent/alloted-customer/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          hokerId: selectedHoker || null,
+        }),
       })
-
-      if (!res.ok) throw new Error()
-
       router.back()
     } catch {
       alert("Update failed")
@@ -88,26 +109,14 @@ export default function AgentEditAllotedCustomerPage() {
     }
   }
 
-  /* =====================
-     Delete
-  ===================== */
   const handleDelete = async () => {
-    if (!id) return
-
-    const ok = confirm(
-      "Are you sure? This will remove the allotment permanently."
-    )
-    if (!ok) return
-
+    if (!confirm("Remove allotment permanently?")) return
     setDeleting(true)
 
     try {
-      const res = await fetch(`/api/agent/alloted-customer/${id}`, {
+      await fetch(`/api/agent/alloted-customer/${id}`, {
         method: "DELETE",
       })
-
-      if (!res.ok) throw new Error()
-
       router.back()
     } catch {
       alert("Delete failed")
@@ -116,41 +125,78 @@ export default function AgentEditAllotedCustomerPage() {
     }
   }
 
-  if (loading) return <div className="p-4">Loading...</div>
-  if (!form) return null
+  if (loading || !form) return <div className="p-6">Loading...</div>
 
   return (
-    <Card className="max-w-xl mx-auto mt-6">
+    <Card className="max-w-2xl mx-auto mt-8 shadow-sm">
       <CardHeader>
-        <CardTitle>Edit Alloted Customer</CardTitle>
+        <CardTitle className="text-xl">
+          Edit Alloted Customer
+        </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        {(["PB", "BH", "HT", "TIMES", "HINDU"] as const).map((key) => (
-          <div key={key}>
-            <Label>{key}</Label>
-            <Input
-              type="number"
-              value={form[key]}
-              onChange={(e) =>
-                setForm({ ...form, [key]: Number(e.target.value) })
-              }
-            />
-          </div>
-        ))}
+      <CardContent className="space-y-6">
+        {/* 📰 Newspapers */}
+        <div>
+          <h3 className="text-sm font-medium mb-3 text-muted-foreground">
+            Newspaper Quantity
+          </h3>
 
-        <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 gap-4">
+            {(["PB", "BH", "HT", "TIMES", "HINDU"] as const).map((key) => (
+              <div key={key}>
+                <Label className="text-xs">{key}</Label>
+                <Input
+                  type="number"
+                  value={form[key]}
+                  onChange={(e) =>
+                    setForm({ ...form, [key]: Number(e.target.value) })
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* ⚡ Status */}
+        <div className="flex items-center justify-between">
+          <Label className="text-sm">Active Status</Label>
           <Switch
             checked={form.is_active}
             onCheckedChange={(v) =>
               setForm({ ...form, is_active: v })
             }
           />
-          <Label>Active</Label>
         </div>
 
-        {/* ACTION BUTTONS */}
-        <div className="flex gap-3 pt-2">
+        <Separator />
+
+        {/* 👷 Hoker */}
+        <div>
+          <Label className="text-sm mb-1 block">
+            Assign Hoker
+          </Label>
+          <Select
+            value={selectedHoker}
+            onValueChange={setSelectedHoker}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select hoker" />
+            </SelectTrigger>
+            <SelectContent>
+              {hokers.map((h) => (
+                <SelectItem key={h._id} value={h._id}>
+                  {h.full_name} • {h.mobile}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 🔘 Actions */}
+        <div className="flex gap-3 pt-4">
           <Button
             onClick={handleSave}
             disabled={saving}
@@ -165,7 +211,7 @@ export default function AgentEditAllotedCustomerPage() {
             disabled={deleting}
             className="flex-1"
           >
-            {deleting ? "Deleting..." : "Delete Allotment"}
+            {deleting ? "Deleting..." : "Delete"}
           </Button>
         </div>
       </CardContent>

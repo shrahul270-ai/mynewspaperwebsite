@@ -4,6 +4,7 @@ import { MongoClient, ObjectId } from "mongodb";
 import { headers } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
+import CustomerDetailsDialog from "@/components/CustomerDetailsDialog"
 
 import {
   Card,
@@ -180,10 +181,11 @@ export default async function AgentCustomers() {
                   <TableHead>HT</TableHead>
                   <TableHead>TIMES</TableHead>
                   <TableHead>HINDU</TableHead>
-                  <TableHead>स्थिति</TableHead>
-                  <TableHead>अलॉट की तारीख</TableHead>
-                  <TableHead>डिलीवरी</TableHead>
-                  <TableHead>संपादन</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Joining Date</TableHead>
+                  <TableHead>Delievery</TableHead>
+                  <TableHead>Edit/View</TableHead>
+                  <TableHead>Details</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -255,7 +257,16 @@ export default async function AgentCustomers() {
                       <Link href={`/agent/edit-allotment?id=${item.customer}`}>
                         <Button variant="outline">Edit/View</Button>
                       </Link>
+
+
+                      
                     </TableCell>
+
+                    <TableCell>
+  <CustomerDetailsDialog
+    customerId={item.customer.toString()}
+  />
+</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
