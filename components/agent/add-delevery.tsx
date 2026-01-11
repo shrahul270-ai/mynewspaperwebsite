@@ -47,6 +47,7 @@ export default function DeliveryPage() {
   const customerId = searchParams.get("id")
 
   const [hokers, setHokers] = useState<Hoker[]>([])
+  const [assignedHokers, setAssignedHokers] = useState<Hoker[]>([])
   const [newspapers, setNewspapers] = useState<Newspaper[]>([])
   const [booklets, setBooklets] = useState<Booklet[]>([])
 
@@ -83,8 +84,14 @@ export default function DeliveryPage() {
         }
 
         setHokers(data.hokers || [])
+        setAssignedHokers(data.assignedHokers || [])
         setNewspapers(data.newspapers || [])
         setBooklets(data.booklets || [])
+
+        // 👉 default select: assigned hoker (if exists)
+        if (data.assignedHokers?.length > 0) {
+          setSelectedHoker(data.assignedHokers[0]._id)
+        }
       } catch {
         toast.error("सर्वर से कनेक्ट नहीं हो पाया")
       }
@@ -141,10 +148,7 @@ export default function DeliveryPage() {
         return
       }
 
-      toast.success("डिलीवरी सफलतापूर्वक सेव हो गई ✅", {
-        description: "आपको वापस ले जाया जा रहा है",
-      })
-
+      toast.success("डिलीवरी सफलतापूर्वक सेव हो गई ✅")
       router.back()
     } catch {
       toast.error("कुछ गड़बड़ हो गई, दोबारा कोशिश करें")
@@ -155,20 +159,24 @@ export default function DeliveryPage() {
 
   /* ================= UI ================= */
 
+  const assignedHokerChanged =
+    assignedHokers.length > 0 &&
+    selectedHoker &&
+    selectedHoker !== assignedHokers[0]._id
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
 
-      {/* ================= GUIDE ================= */}
+      {/* GUIDE */}
       <Card className="bg-muted">
         <CardHeader>
           <CardTitle>📢 डिलीवरी भरने की जानकारी</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>👉 सबसे पहले हॉकर चुनें जो डिलीवरी करेगा।</p>
-          <p>👉 उसके बाद डिलीवरी की तारीख चुनें।</p>
-          <p>👉 हर अख़बार और पुस्तिका की सही संख्या चुनें।</p>
-          <p>👉 अगर कोई अतिरिक्त डिलीवरी है, तो उसका कारण और संख्या लिखें।</p>
-          <p>👉 अंत में “Save Delivery” बटन दबाएँ।</p>
+        <CardContent className="text-sm text-muted-foreground space-y-1">
+          <p>👉 हॉकर चुनें (ज़रूरत हो तो बदल सकते हैं)</p>
+          <p>👉 तारीख चुनें</p>
+          <p>👉 अख़बार / पुस्तिका की संख्या भरें</p>
+          <p>👉 अंत में Save दबाएँ</p>
         </CardContent>
       </Card>
 
@@ -178,11 +186,24 @@ export default function DeliveryPage() {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {/* INFO */}
+          {assignedHokers.length > 0 && (
+            <p className="text-sm text-green-600">
+              ✅ इस ग्राहक के लिए हॉकर पहले से निर्धारित है
+            </p>
+          )}
+
+          {assignedHokerChanged && (
+            <p className="text-sm text-orange-600">
+              ⚠️ आप assigned हॉकर से अलग हॉकर चुन रहे हैं
+            </p>
+          )}
+
           {/* Hoker */}
           <div>
             <Label>Hoker</Label>
             <Select value={selectedHoker} onValueChange={setSelectedHoker}>
-              <SelectTrigger className="mt-2">
+              <SelectTrigger className="mt-2 w-full">
                 <SelectValue placeholder="Select Hoker" />
               </SelectTrigger>
               <SelectContent>
@@ -216,7 +237,7 @@ export default function DeliveryPage() {
                   setNewsQty({ ...newsQty, [n._id]: Number(val) })
                 }
               >
-                <SelectTrigger className="mt-2">
+                <SelectTrigger className="mt-2 w-full">
                   <SelectValue
                     placeholder={`${n.name} (${n.language}) - ₹${n.price}`}
                   />
@@ -242,10 +263,8 @@ export default function DeliveryPage() {
                   setBookletQty({ ...bookletQty, [b._id]: Number(val) })
                 }
               >
-                <SelectTrigger className="mt-2">
-                  <SelectValue
-                    placeholder={`${b.title} - ₹${b.price}`}
-                  />
+                <SelectTrigger className="mt-2 w-full">
+                  <SelectValue placeholder={`${b.title} - ₹${b.price}`} />
                 </SelectTrigger>
                 <SelectContent>
                   {[0, 1, 2, 3, 4, 5].map(q => (

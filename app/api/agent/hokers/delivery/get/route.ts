@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    /* ✅ id MUST be present */
+    /* ✅ Customer ID */
     const customerId = request.nextUrl.searchParams.get("id")
     if (!customerId) {
       return NextResponse.json(
@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
     const subsCol = db.collection("customer_subscriptions")
     const newspapersCol = db.collection("newspapers")
     const bookletsCol = db.collection("booklets")
+    const customersCol = db.collection("customers")
 
     const agentObjectId = new ObjectId(agentId)
     const customerObjectId = new ObjectId(customerId)
@@ -58,14 +59,19 @@ export async function GET(request: NextRequest) {
         {
           projection: {
             full_name: 1,
-            email: 1,
             mobile: 1,
+            email: 1,
           },
         }
       )
       .toArray()
 
-    /* 📦 Customer Subscriptions */
+    /* 👤 Customer Profile */
+    const customerProfile = await customersCol.findOne({
+      _id: customerObjectId,
+    })
+
+    /* 🧾 Subscription */
     const subscription = await subsCol.findOne({
       customerId: customerObjectId,
     })
@@ -91,12 +97,39 @@ export async function GET(request: NextRequest) {
       })
       .toArray()
 
+    /* 🚚 Assigned Hoker (from customer profile) */
+    let assignedHokers: any[] = []
+
+    if (customerProfile?.hoker?.length) {
+      assignedHokers = await hokersCol
+        .find(
+          {
+            _id: { $in: customerProfile.hoker },
+          },
+          {
+            projection: {
+              full_name: 1,
+              mobile: 1,
+              email: 1,
+            },
+          }
+        )
+        .toArray()
+    }
+
     /* ✅ FINAL RESPONSE */
     return NextResponse.json({
       success: true,
+      customer: {
+        _id: customerProfile?._id,
+        name: customerProfile?.name,
+        mobile: customerProfile?.mobile,
+        address: customerProfile?.address,
+      },
       newspapers,
       booklets,
-      hokers,
+      hokers,          // agent ke sab hokers
+      assignedHokers,  // customer ko already assigned hoker
     })
   } catch (error) {
     console.error("GET CUSTOMER DATA ERROR:", error)
