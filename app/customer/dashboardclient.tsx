@@ -51,7 +51,7 @@ export default function CustomerDashboardClient({
       "
     >
       {/* ================= MOBILE HEADER ================= */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-b">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b">
         <div className="flex items-center justify-between px-4 h-14">
           <Sheet>
             <SheetTrigger asChild>
@@ -61,7 +61,7 @@ export default function CustomerDashboardClient({
             </SheetTrigger>
 
             <SheetContent side="left" className="p-0 w-72">
-              <Sidebar
+              <MobileSidebar
                 fullName={fullName}
                 photo={photo}
                 initials={initials}
@@ -76,8 +76,8 @@ export default function CustomerDashboardClient({
       </div>
 
       {/* ================= DESKTOP SIDEBAR ================= */}
-      <aside className="hidden lg:flex w-64">
-        <Sidebar
+      <aside className="hidden lg:flex w-64 fixed left-0 top-0 bottom-0 z-40">
+        <DesktopSidebar
           fullName={fullName}
           photo={photo}
           initials={initials}
@@ -86,9 +86,9 @@ export default function CustomerDashboardClient({
       </aside>
 
       {/* ================= MAIN CONTENT ================= */}
-      <main className="flex-1 pt-16 lg:pt-6 p-4 lg:p-6">
+      <main className="flex-1 lg:ml-64 pt-16 lg:pt-6 p-4 lg:p-6">
         <div className="max-w-7xl mx-auto">
-          <Card className="rounded-2xl shadow-lg border  bg-transparent">
+          <Card className="rounded-2xl shadow-lg border bg-transparent">
             <CardContent className="p-6 lg:p-8">
               {children}
             </CardContent>
@@ -99,9 +99,9 @@ export default function CustomerDashboardClient({
   )
 }
 
-/* ================= SIDEBAR ================= */
+/* ================= DESKTOP SIDEBAR ================= */
 
-function Sidebar({
+function DesktopSidebar({
   fullName,
   photo,
   initials,
@@ -141,52 +141,153 @@ function Sidebar({
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1">
-        <NavItem
-          href="/customer/profile"
-          icon={<User className="h-4 w-4" />}
-          label="My Profile"
-          active={pathname === "/customer/profile"}
-        />
-        <NavItem
-          href="/customer/calendar"
-          icon={<Calendar className="h-4 w-4" />}
-          label="Calendar"
-          active={pathname === "/customer/calendar"}
-        />
-        <NavItem
-          href="/customer/bills"
-          icon={<CreditCard className="h-4 w-4" />}
-          label="Bills"
-          active={pathname === "/customer/bills"}
-        />
-        <NavItem
-          href="/customer/papers"
-          icon={<FileText className="h-4 w-4" />}
-          label="Papers"
-          active={pathname === "/customer/papers"}
-        />
-        <NavItem
-          href="/customer/agents"
-          icon={<Users className="h-4 w-4" />}
-          label="Agents"
-          active={pathname === "/customer/agents"}
-        />
-      </nav>
+      {/* Nav with scroll */}
+      <div className="flex-1 overflow-y-auto p-3">
+        <nav className="space-y-1">
+          <NavItem
+            href="/customer/profile"
+            icon={<User className="h-4 w-4" />}
+            label="My Profile"
+            active={pathname === "/customer/profile"}
+          />
+          <NavItem
+            href="/customer/calendar"
+            icon={<Calendar className="h-4 w-4" />}
+            label="Calendar"
+            active={pathname === "/customer/calendar"}
+          />
+          <NavItem
+            href="/customer/bills"
+            icon={<CreditCard className="h-4 w-4" />}
+            label="Bills"
+            active={pathname === "/customer/bills"}
+          />
+          <NavItem
+            href="/customer/papers"
+            icon={<FileText className="h-4 w-4" />}
+            label="Papers"
+            active={pathname === "/customer/papers"}
+          />
+          <NavItem
+            href="/customer/agents"
+            icon={<Users className="h-4 w-4" />}
+            label="Agents"
+            active={pathname === "/customer/agents"}
+          />
+        </nav>
+      </div>
 
-      {/* Bottom */}
-      <div className="p-3 border-t space-y-2">
-        <ModeToggle />
-        <a href="/api/signout">
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
-        </a>
+      {/* Fixed bottom section */}
+      <div className="p-3 border-t bg-white dark:bg-gray-900">
+        <div className="space-y-2">
+          <ModeToggle />
+          <a href="/api/signout">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ================= MOBILE SIDEBAR ================= */
+
+function MobileSidebar({
+  fullName,
+  photo,
+  initials,
+  email,
+}: {
+  fullName: string
+  photo?: string
+  initials: string
+  email: string
+}) {
+  const pathname = usePathname()
+
+  return (
+    <div className="w-full h-full bg-white dark:bg-gray-900 flex flex-col">
+      {/* Logo */}
+      <div className="p-5 border-b flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gray-900 dark:bg-gray-100 flex items-center justify-center text-white dark:text-black">
+          <LayoutDashboard />
+        </div>
+        <div>
+          <h2 className="font-bold">Portal</h2>
+          <p className="text-xs text-muted-foreground">Customer</p>
+        </div>
+      </div>
+
+      {/* Profile */}
+      <div className="p-5 border-b flex items-center gap-3">
+        <Avatar className="h-12 w-12">
+          <AvatarImage src={photo} />
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
+        <div>
+          <p className="font-semibold text-sm">{fullName}</p>
+          <Badge variant="secondary" className="text-xs">
+            {email.slice(0, 14)}...
+          </Badge>
+        </div>
+      </div>
+
+      {/* Nav with scroll */}
+      <div className="flex-1 overflow-y-auto p-3">
+        <nav className="space-y-1">
+          <NavItem
+            href="/customer/profile"
+            icon={<User className="h-4 w-4" />}
+            label="My Profile"
+            active={pathname === "/customer/profile"}
+          />
+          <NavItem
+            href="/customer/calendar"
+            icon={<Calendar className="h-4 w-4" />}
+            label="Calendar"
+            active={pathname === "/customer/calendar"}
+          />
+          <NavItem
+            href="/customer/bills"
+            icon={<CreditCard className="h-4 w-4" />}
+            label="Bills"
+            active={pathname === "/customer/bills"}
+          />
+          <NavItem
+            href="/customer/papers"
+            icon={<FileText className="h-4 w-4" />}
+            label="Papers"
+            active={pathname === "/customer/papers"}
+          />
+          <NavItem
+            href="/customer/agents"
+            icon={<Users className="h-4 w-4" />}
+            label="Agents"
+            active={pathname === "/customer/agents"}
+          />
+        </nav>
+      </div>
+
+      {/* Fixed bottom section */}
+      <div className="p-3 border-t bg-white dark:bg-gray-900">
+        <div className="space-y-2">
+          <ModeToggle />
+          <a href="/api/signout">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </a>
+        </div>
       </div>
     </div>
   )
