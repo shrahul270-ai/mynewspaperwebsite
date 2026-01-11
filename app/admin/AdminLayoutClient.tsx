@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   type LucideIcon,
+  LayoutDashboard,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -42,6 +43,8 @@ type NavItem = NavLinkItem | NavSeparator
 /* ================= DATA ================= */
 
 const navLinks: NavItem[] = [
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+
   { href: "/admin/newspapers", label: "Newspapers", icon: Newspaper },
   { href: "/admin/add-newspaper", label: "Add Newspaper", icon: PlusSquare },
 
@@ -58,6 +61,7 @@ const navLinks: NavItem[] = [
 
   { href: "/admin/db", label: "Database", icon: Database },
 ]
+
 
 /* ================= COMPONENT ================= */
 
@@ -80,31 +84,36 @@ export default function AdminLayoutClient({
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navLinks.map((item, index) => {
-          if (item.type === "separator") {
-            return <Separator key={index} className="my-3" />
-          }
+  {navLinks.map((item, index) => {
+    if (item.type === "separator") {
+      return <Separator key={index} className="my-3" />
+    }
 
-          const isActive = pathname.startsWith(item.href)
-          const Icon = item.icon
+    const isActive =
+      item.href === "/admin"
+        ? pathname === "/admin"
+        : pathname.startsWith(item.href)
 
-          return (
-            <Link key={item.href} href={item.href}>
-              <div
-                className={cn(
-                  "group flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-all",
-                  isActive
-                    ? "bg-primary/10 text-primary border-l-4 border-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="font-medium">{item.label}</span>
-              </div>
-            </Link>
-          )
-        })}
-      </nav>
+    const Icon = item.icon
+
+    return (
+      <Link key={item.href} href={item.href}>
+        <div
+          className={cn(
+            "group flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-all",
+            isActive
+              ? "bg-primary/10 text-primary border-l-4 border-primary"
+              : "text-muted-foreground hover:bg-muted"
+          )}
+        >
+          <Icon className="h-4 w-4" />
+          <span className="font-medium">{item.label}</span>
+        </div>
+      </Link>
+    )
+  })}
+</nav>
+
 
       {/* Logout */}
       <div className="p-4 border-t shrink-0">
