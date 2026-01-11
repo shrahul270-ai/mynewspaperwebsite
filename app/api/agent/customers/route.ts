@@ -56,7 +56,8 @@ export async function GET(req: NextRequest) {
           projection: {
             name: 1,
             surname: 1,
-            email:1
+            email:1,
+            mobile:1
           },
         }
       )

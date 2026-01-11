@@ -253,7 +253,7 @@ export default async function AgentCustomers() {
 
                     <TableCell>
                       <Link href={`/agent/edit-allotment?id=${item.customer}`}>
-                        <Button variant="outline">Edit</Button>
+                        <Button variant="outline">Edit/View</Button>
                       </Link>
                     </TableCell>
                   </TableRow>

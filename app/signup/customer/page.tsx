@@ -130,7 +130,7 @@ export default function CustomerSignupPage() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="mobile">Mobile Number *</Label>
+                    <Label htmlFor="mobile">Whatsapp Mobile Number *</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <Input

@@ -38,9 +38,7 @@ export default async function HokerDashboardLayout({
   /* 🔐 AUTH CHECK */
   const token = (await cookies()).get("token")?.value
 
-  if (!token) {
-    redirect("/login/hoker")
-  }
+  if (!token) redirect("/login/hoker")
 
   try {
     const decoded = jwt.verify(
@@ -51,34 +49,39 @@ export default async function HokerDashboardLayout({
     if (decoded.role !== "hoker") {
       redirect("/login/hoker")
     }
-  } catch (err) {
+  } catch {
     redirect("/login/hoker")
   }
 
   return (
-    <div className="flex min-h-screen bg-muted/40">
+    <div className="flex h-screen bg-muted/40 overflow-hidden">
       {/* =====================
           Desktop Sidebar
       ===================== */}
-      <aside className="hidden md:flex w-64 flex-col border-r bg-background">
-        <div className="p-4 text-lg font-semibold border-b">
+      <aside className="hidden md:flex w-64 flex-col border-r bg-background h-full">
+        <div className="p-4 text-lg font-semibold border-b shrink-0">
           Hoker Dashboard
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
+        {/* LINKS */}
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           <SidebarLinks />
         </nav>
 
-        <div className="p-3 border-t">
+        {/* LOGOUT ALWAYS VISIBLE */}
+        <div className="p-3 border-t shrink-0">
           <LogoutButton />
         </div>
       </aside>
 
       {/* =====================
-          Mobile Header
+          Main Section
       ===================== */}
-      <div className="flex flex-col flex-1">
-        <header className="md:hidden flex items-center justify-between px-4 h-14 border-b bg-background">
+      <div className="flex flex-col flex-1 h-full overflow-hidden">
+        {/* =====================
+            Mobile Header
+        ===================== */}
+        <header className="md:hidden flex items-center justify-between px-4 h-14 border-b bg-background shrink-0">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -86,13 +89,18 @@ export default async function HokerDashboardLayout({
               </Button>
             </SheetTrigger>
 
-            <SheetContent side="left" className="p-0">
+            <SheetContent
+              side="left"
+              className="p-0 h-full overflow-y-auto"
+            >
               <div className="p-4 text-lg font-semibold border-b">
                 Hoker Dashboard
               </div>
+
               <nav className="p-3 space-y-1">
                 <SidebarLinks />
               </nav>
+
               <div className="p-3 border-t">
                 <LogoutButton />
               </div>
@@ -103,9 +111,9 @@ export default async function HokerDashboardLayout({
         </header>
 
         {/* =====================
-            Main Content
+            MAIN CONTENT (SCROLLABLE)
         ===================== */}
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           {children}
         </main>
       </div>

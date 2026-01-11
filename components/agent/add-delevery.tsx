@@ -66,7 +66,7 @@ export default function DeliveryPage() {
 
   useEffect(() => {
     if (!customerId) {
-      toast.error("ग्राहक की जानकारी नहीं मिली")
+      toast.error("Choose Your Customer")
       router.replace("/agent/customers")
       return
     }
@@ -211,7 +211,7 @@ export default function DeliveryPage() {
 
   /* ================= UI ================= */
 
-  const assignedHokerChanged =
+const assignedHokerChanged =
     assignedHokers.length > 0 &&
     selectedHoker &&
     selectedHoker !== assignedHokers[0]._id
