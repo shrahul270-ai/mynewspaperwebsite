@@ -122,11 +122,11 @@ export default function CustomerBillsPage() {
 
             {/* Pay Button */}
             {(bill.status === "unpaid" || bill.status === "pending") && (
-              <Button className="w-full">
                 <Link href={`/customer/pay/${bill._id}`}>
+              <Button className="w-full">
                   Pay Now
-                </Link>
               </Button>
+                </Link>
             )}
           </CardContent>
         </Card>
