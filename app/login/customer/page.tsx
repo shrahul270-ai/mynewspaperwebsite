@@ -87,8 +87,9 @@ export default function LoginPage() {
       <Dialog
         open={step !== "login"}
         onOpenChange={(open) => {
-          if (!open) setStep("login");
+          if (open) setStep("login");
         }}
+        
       >
         <DialogContent className="max-w-sm rounded-none bg-background text-foreground">
 

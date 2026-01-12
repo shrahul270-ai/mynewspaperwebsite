@@ -1,5 +1,6 @@
 'use client'
 import { useState } from "react"
+import { toast } from "sonner"
 import {
     Upload,
     User,
@@ -114,53 +115,59 @@ export default function AgentSignupPage() {
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+  e.preventDefault()
 
-        if (formData.password !== formData.confirm_password) {
-            alert("Passwords don't match!");
-            return;
-        }
+  if (formData.password !== formData.confirm_password) {
+    toast.error("Passwords do not match")
+    return
+  }
 
-        if (!formData.terms_accepted) {
-            alert("Please accept the terms and conditions");
-            return;
-        }
+  if (!formData.terms_accepted) {
+    toast.error("Please accept the terms and conditions")
+    return
+  }
 
-        setIsSubmitting(true);
+  setIsSubmitting(true)
 
-        try {
-            const formDataToSend = new FormData();
+  try {
+    const formDataToSend = new FormData()
 
-            Object.entries(formData).forEach(([key, value]) => {
-                if (key === "confirm_password" || key === "terms_accepted") return;
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === "confirm_password" || key === "terms_accepted") return
 
-                if (key === "photo" && value instanceof File) {
-                    formDataToSend.append(key, value);
-                } else if (value !== null && value !== undefined) {
-                    formDataToSend.append(key, value.toString());
-                }
-            });
+      if (key === "photo" && value instanceof File) {
+        formDataToSend.append(key, value)
+      } else if (value !== null && value !== undefined && value !== "") {
+        formDataToSend.append(key, value.toString())
+      }
+    })
 
-            const res = await fetch("/api/agent/signup", {
-                method: "POST",
-                body: formDataToSend,
-            });
+    const res = await fetch("/api/agent/signup", {
+      method: "POST",
+      body: formDataToSend,
+    })
 
-            const data = await res.json();
+    const data = await res.json() // ✅ IMPORTANT
 
-            if (!res.ok) {
-                throw new Error(data.message || "Signup failed");
-            }
+    if (!res.ok) {
+      // 🔥 backend ka exact message
+      toast.error(data.message || "Registration failed")
+      return
+    }
 
-            alert("Registration successful! Please wait for admin approval.");
-            navigate.push("/pending-approval");
-        } catch (error: any) {
-            console.error("Registration failed:", error);
-            alert(error.message || "Registration failed. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    toast.success(
+      "Registration successful 🎉 Your account is pending admin approval."
+    )
+
+    navigate.push("/pending-approval")
+  } catch (err) {
+    console.error(err)
+    toast.error("Server error. Please try again later")
+  } finally {
+    setIsSubmitting(false)
+  }
+}
+
 
 
     const validateCurrentTab = () => {
