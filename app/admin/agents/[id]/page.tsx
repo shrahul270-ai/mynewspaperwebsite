@@ -47,9 +47,10 @@ export default function EditAgentPage() {
   const [form, setForm] = useState<Agent | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState("")
 
-  /* ================= FETCH AGENT ================= */
+  /* ================= FETCH ================= */
 
   useEffect(() => {
     if (!id) return
@@ -67,12 +68,14 @@ export default function EditAgentPage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  /* ================= HANDLERS ================= */
+  /* ================= HELPERS ================= */
 
   const updateField = (key: keyof Agent, value: any) => {
     if (!form) return
     setForm({ ...form, [key]: value })
   }
+
+  /* ================= UPDATE ================= */
 
   const handleSubmit = async () => {
     if (!form) return
@@ -89,7 +92,6 @@ export default function EditAgentPage() {
       const data = await res.json()
       if (!res.ok || !data.success) {
         setError(data.message || "Update failed")
-        setSaving(false)
         return
       }
 
@@ -98,6 +100,38 @@ export default function EditAgentPage() {
       setError("Server error")
     } finally {
       setSaving(false)
+    }
+  }
+
+  /* ================= DELETE ================= */
+
+  const handleDelete = async () => {
+    if (!id) return
+
+    const ok = confirm(
+      "Are you sure you want to delete this agent? This action cannot be undone."
+    )
+    if (!ok) return
+
+    setDeleting(true)
+    setError("")
+
+    try {
+      const res = await fetch(`/api/admin/agents/${id}`, {
+        method: "DELETE",
+      })
+
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setError(data.message || "Delete failed")
+        return
+      }
+
+      router.push("/admin/agents")
+    } catch {
+      setError("Server error")
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -114,7 +148,6 @@ export default function EditAgentPage() {
         </CardHeader>
 
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Full Name */}
           <div>
             <Label>Full Name</Label>
             <Input
@@ -123,7 +156,6 @@ export default function EditAgentPage() {
             />
           </div>
 
-          {/* Email */}
           <div>
             <Label>Email</Label>
             <Input
@@ -132,7 +164,6 @@ export default function EditAgentPage() {
             />
           </div>
 
-          {/* Mobile */}
           <div>
             <Label>Mobile</Label>
             <Input
@@ -141,7 +172,6 @@ export default function EditAgentPage() {
             />
           </div>
 
-          {/* Agency */}
           <div>
             <Label>Agency Name</Label>
             <Input
@@ -150,7 +180,6 @@ export default function EditAgentPage() {
             />
           </div>
 
-          {/* Agency Phone */}
           <div>
             <Label>Agency Phone</Label>
             <Input
@@ -159,7 +188,6 @@ export default function EditAgentPage() {
             />
           </div>
 
-          {/* Age */}
           <div>
             <Label>Age</Label>
             <Input
@@ -169,16 +197,13 @@ export default function EditAgentPage() {
             />
           </div>
 
-          {/* Gender */}
           <div>
             <Label>Gender</Label>
             <Select
               value={form.gender}
               onValueChange={(v) => updateField("gender", v as Gender)}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
@@ -187,16 +212,13 @@ export default function EditAgentPage() {
             </Select>
           </div>
 
-          {/* Status */}
           <div>
             <Label>Status</Label>
             <Select
               value={form.status}
               onValueChange={(v) => updateField("status", v as AgentStatus)}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
@@ -205,7 +227,6 @@ export default function EditAgentPage() {
             </Select>
           </div>
 
-          {/* Address */}
           <div className="md:col-span-2">
             <Label>Address</Label>
             <Input
@@ -214,61 +235,50 @@ export default function EditAgentPage() {
             />
           </div>
 
-          {/* Location */}
           <div>
             <Label>State</Label>
-            <Input
-              value={form.state}
-              onChange={(e) => updateField("state", e.target.value)}
-            />
+            <Input value={form.state} onChange={(e) => updateField("state", e.target.value)} />
           </div>
 
           <div>
             <Label>District</Label>
-            <Input
-              value={form.district}
-              onChange={(e) => updateField("district", e.target.value)}
-            />
+            <Input value={form.district} onChange={(e) => updateField("district", e.target.value)} />
           </div>
 
           <div>
             <Label>Tehsil</Label>
-            <Input
-              value={form.tehsil}
-              onChange={(e) => updateField("tehsil", e.target.value)}
-            />
+            <Input value={form.tehsil} onChange={(e) => updateField("tehsil", e.target.value)} />
           </div>
 
           <div>
             <Label>Village</Label>
-            <Input
-              value={form.village}
-              onChange={(e) => updateField("village", e.target.value)}
-            />
+            <Input value={form.village} onChange={(e) => updateField("village", e.target.value)} />
           </div>
 
           <div>
             <Label>Pincode</Label>
-            <Input
-              value={form.pincode}
-              onChange={(e) => updateField("pincode", e.target.value)}
-            />
+            <Input value={form.pincode} onChange={(e) => updateField("pincode", e.target.value)} />
           </div>
         </CardContent>
       </Card>
 
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <Button onClick={handleSubmit} disabled={saving}>
           {saving ? "Saving..." : "Save Changes"}
         </Button>
 
-        <Button
-          variant="outline"
-          onClick={() => router.push("/admin/agents")}
-        >
+        <Button variant="outline" onClick={() => router.push("/admin/agents")}>
           Cancel
+        </Button>
+
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={deleting}
+        >
+          {deleting ? "Deleting..." : "Delete Agent"}
         </Button>
       </div>
     </div>

@@ -43,9 +43,10 @@ export default function EditCustomerPage() {
   const [form, setForm] = useState<Customer | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState("")
 
-  /* ================= FETCH CUSTOMER ================= */
+  /* ================= FETCH ================= */
 
   useEffect(() => {
     if (!id) return
@@ -63,12 +64,14 @@ export default function EditCustomerPage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  /* ================= HANDLERS ================= */
+  /* ================= HELPERS ================= */
 
   const updateField = (key: keyof Customer, value: any) => {
     if (!form) return
     setForm({ ...form, [key]: value })
   }
+
+  /* ================= UPDATE ================= */
 
   const handleSubmit = async () => {
     if (!form) return
@@ -85,7 +88,6 @@ export default function EditCustomerPage() {
       const data = await res.json()
       if (!res.ok || !data.success) {
         setError(data.message || "Update failed")
-        setSaving(false)
         return
       }
 
@@ -94,6 +96,38 @@ export default function EditCustomerPage() {
       setError("Server error")
     } finally {
       setSaving(false)
+    }
+  }
+
+  /* ================= DELETE ================= */
+
+  const handleDelete = async () => {
+    if (!id) return
+
+    const ok = confirm(
+      "Are you sure you want to delete this customer? This action cannot be undone."
+    )
+    if (!ok) return
+
+    setDeleting(true)
+    setError("")
+
+    try {
+      const res = await fetch(`/api/admin/customers/${id}`, {
+        method: "DELETE",
+      })
+
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setError(data.message || "Delete failed")
+        return
+      }
+
+      router.push("/admin/customers")
+    } catch {
+      setError("Server error")
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -110,7 +144,6 @@ export default function EditCustomerPage() {
         </CardHeader>
 
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Name */}
           <div>
             <Label>Name</Label>
             <Input
@@ -119,7 +152,6 @@ export default function EditCustomerPage() {
             />
           </div>
 
-          {/* Surname */}
           <div>
             <Label>Surname</Label>
             <Input
@@ -128,7 +160,6 @@ export default function EditCustomerPage() {
             />
           </div>
 
-          {/* Email */}
           <div>
             <Label>Email</Label>
             <Input
@@ -137,7 +168,6 @@ export default function EditCustomerPage() {
             />
           </div>
 
-          {/* Mobile */}
           <div>
             <Label>Mobile</Label>
             <Input
@@ -146,7 +176,6 @@ export default function EditCustomerPage() {
             />
           </div>
 
-          {/* Age */}
           <div>
             <Label>Age</Label>
             <Input
@@ -158,7 +187,6 @@ export default function EditCustomerPage() {
             />
           </div>
 
-          {/* Gender */}
           <div>
             <Label>Gender</Label>
             <Select
@@ -176,7 +204,6 @@ export default function EditCustomerPage() {
             </Select>
           </div>
 
-          {/* Address */}
           <div className="md:col-span-2">
             <Label>Address</Label>
             <Input
@@ -187,7 +214,6 @@ export default function EditCustomerPage() {
             />
           </div>
 
-          {/* Location */}
           <div>
             <Label>State</Label>
             <Input
@@ -240,7 +266,7 @@ export default function EditCustomerPage() {
 
       {error && <p className="text-red-500">{error}</p>}
 
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <Button onClick={handleSubmit} disabled={saving}>
           {saving ? "Saving..." : "Save Changes"}
         </Button>
@@ -250,6 +276,14 @@ export default function EditCustomerPage() {
           onClick={() => router.push("/admin/customers")}
         >
           Cancel
+        </Button>
+
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={deleting}
+        >
+          {deleting ? "Deleting..." : "Delete Customer"}
         </Button>
       </div>
     </div>

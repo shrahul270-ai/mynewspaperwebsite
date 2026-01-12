@@ -117,3 +117,48 @@ export async function PUT(
     )
   }
 }
+
+
+/* ========= DELETE ========= */
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    await verifyAdmin()
+    const { id } = await context.params
+
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid customer id" },
+        { status: 400 }
+      )
+    }
+
+    await client.connect()
+    const db = client.db("maindatabase")
+    const customers = db.collection("customers")
+
+    const result = await customers.deleteOne({
+      _id: new ObjectId(id),
+    })
+
+    if (!result.deletedCount) {
+      return NextResponse.json(
+        { success: false, message: "Customer not found" },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Customer deleted successfully",
+    })
+  } catch (err: any) {
+    return NextResponse.json(
+      { success: false, message: err.message },
+      { status: 500 }
+    )
+  }
+}
