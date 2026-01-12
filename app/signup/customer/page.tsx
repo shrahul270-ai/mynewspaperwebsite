@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from "sonner"
 import { User, Phone, Mail, MapPin, Calendar, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -45,42 +46,46 @@ export default function CustomerSignupPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Basic validation
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!")
-      return
-    }
+  e.preventDefault()
 
-    if (!formData.name || !formData.mobile || !formData.email || !formData.address) {
-      alert("Please fill all required fields")
-      return
-    }
-
-    setIsSubmitting(true)
-
-    try {
-      // API call
-      const response = await fetch('/api/customers/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        alert('Registration successful!')
-        router.push('/customer/select-agent')
-      } else {
-        alert('Registration failed. Please try again.')
-      }
-    } catch (error) {
-      console.error('Error:', error)
-      alert('Something went wrong. Please try again.')
-    } finally {
-      setIsSubmitting(false)
-    }
+  if (formData.password !== formData.confirmPassword) {
+    toast.error("Passwords do not match")
+    return
   }
+
+  if (!formData.name || !formData.mobile || !formData.email || !formData.address) {
+    toast.error("Please fill all required fields")
+    return
+  }
+
+  setIsSubmitting(true)
+
+  try {
+    const res = await fetch("/api/customers/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    })
+
+    const data = await res.json() // ✅ IMPORTANT
+
+    if (!res.ok) {
+      // 🔥 backend ka real message
+      toast.error(data.message || "Registration failed")
+      return
+    }
+
+    toast.success("Account created successfully 🎉")
+    router.push("/customer/select-agent")
+
+  } catch (err) {
+    console.error(err)
+    toast.error("Server error. Please try again later")
+  } finally {
+    setIsSubmitting(false)
+  }
+}
+
 
   return (
     <div className="min-h-screen flex items-center justify-center  p-4">
