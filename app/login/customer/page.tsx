@@ -87,6 +87,7 @@ export default function LoginPage() {
       <Dialog
         open={step !== "login"}
         onOpenChange={(open) => {
+          
           if (open) setStep("login");
         }}
         
