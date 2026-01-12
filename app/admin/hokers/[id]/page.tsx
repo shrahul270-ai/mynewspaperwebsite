@@ -32,6 +32,7 @@ export default function EditHokerPage() {
 
   const [form, setForm] = useState<Hoker | null>(null)
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   /* ================= GET HOKER ================= */
 
@@ -76,9 +77,7 @@ export default function EditHokerPage() {
     try {
       const res = await fetch(`/api/admin/hokers/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       })
 
@@ -95,6 +94,39 @@ export default function EditHokerPage() {
       alert("Server error")
     } finally {
       setLoading(false)
+    }
+  }
+
+  /* ================= DELETE ================= */
+
+  async function handleDelete() {
+    if (!id) return
+
+    const ok = confirm(
+      "Are you sure you want to delete this hoker? This action cannot be undone."
+    )
+    if (!ok) return
+
+    setDeleting(true)
+
+    try {
+      const res = await fetch(`/api/admin/hokers/${id}`, {
+        method: "DELETE",
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        alert(data.message || "Delete failed")
+      } else {
+        alert("Hoker deleted successfully 🗑️")
+        router.push("/admin/hokers")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Server error")
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -133,7 +165,7 @@ export default function EditHokerPage() {
         <InputField label="District" name="district" value={form.district} onChange={handleChange} />
         <InputField label="State" name="state" value={form.state} onChange={handleChange} />
 
-        <div className="md:col-span-2 flex justify-end gap-2 pt-4">
+        <div className="md:col-span-2 flex flex-wrap justify-end gap-2 pt-4">
           <Button
             type="button"
             variant="outline"
@@ -141,8 +173,18 @@ export default function EditHokerPage() {
           >
             Cancel
           </Button>
+
           <Button type="submit" disabled={loading}>
             {loading ? "Saving..." : "Save Changes"}
+          </Button>
+
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "Delete Hoker"}
           </Button>
         </div>
       </form>

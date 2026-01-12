@@ -154,3 +154,56 @@ export async function PUT(
     )
   }
 }
+
+
+/* ================= DELETE ================= */
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await verifyAdmin()
+  if ("error" in auth) {
+    return NextResponse.json(
+      { success: false, message: auth.error },
+      { status: auth.status }
+    )
+  }
+
+  try {
+    const { id } = await params
+
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid hoker id" },
+        { status: 400 }
+      )
+    }
+
+    await client.connect()
+    const db = client.db("maindatabase")
+    const hokersCol = db.collection("hokers")
+
+    const result = await hokersCol.deleteOne({
+      _id: new ObjectId(id),
+    })
+
+    if (!result.deletedCount) {
+      return NextResponse.json(
+        { success: false, message: "Hoker not found" },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Hoker deleted successfully",
+    })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 }
+    )
+  }
+}
