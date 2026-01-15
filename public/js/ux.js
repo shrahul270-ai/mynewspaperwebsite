@@ -41,3 +41,5 @@ closePopup.addEventListener("click", () => {
 window.addEventListener("click", (e) => {
   if (e.target === devPopup) devPopup.style.display = "none";
 });
+
+
