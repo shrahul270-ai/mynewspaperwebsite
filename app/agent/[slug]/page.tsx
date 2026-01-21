@@ -4,6 +4,7 @@ import AddAgentCustomersClient from '@/components/agent/addCustomer'
 import AgentAllBillsPage from '@/components/agent/AllBills'
 import CreateHoker from '@/components/agent/CreateHocker'
 import AgentCustomers from '@/components/agent/Customers'
+import Dashboard from '@/components/agent/Dashboard'
 import AgentAllDeliveriesPage from '@/components/agent/DeliverysPage'
 import AgentEditAllotedCustomerPage from '@/components/agent/edit-allotment'
 import AgentProfilePage from '@/components/agent/edit_profile'
@@ -26,6 +27,10 @@ export default async function Page() {
     {
       component: AgentProfile,
       path: '/profile',
+    },
+    {
+      component: Dashboard,
+      path: '/dashboard',
     },
     {
       component: AddAgentCustomersClient,

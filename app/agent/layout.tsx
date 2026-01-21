@@ -12,6 +12,8 @@ import {
   X,
   Newspaper,
   DollarSign,
+  BookDashed,
+  LayoutDashboard,
 } from "lucide-react"
 
 import { Separator } from "@/components/ui/separator"
@@ -31,6 +33,7 @@ interface AgentLayoutProps {
 }
 
 const menuItems = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/agent/dashboard" },
   { id: "profile", label: "Profile", icon: UserCog, href: "/agent/profile" },
   { id: "customers", label: "Customers", icon: Users, href: "/agent/customers" },
   { id: "hockers", label: "Hockers", icon: Users, href: "/agent/hockers" },
