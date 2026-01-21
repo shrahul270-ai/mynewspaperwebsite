@@ -18,11 +18,14 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params  // ✅ FIX
+    const { id } = await context.params
 
     const token = (await cookies()).get("token")?.value
     if (!token)
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      )
 
     const decoded = jwt.verify(
       token,
@@ -30,7 +33,10 @@ export async function GET(
     ) as AdminJwtPayload
 
     if (decoded.role !== "admin")
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 })
+      return NextResponse.json(
+        { message: "Forbidden" },
+        { status: 403 }
+      )
 
     await client.connect()
     const db = client.db("maindatabase")
@@ -63,11 +69,14 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params  // ✅ FIX
+    const { id } = await context.params
 
     const token = (await cookies()).get("token")?.value
     if (!token)
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      )
 
     const decoded = jwt.verify(
       token,
@@ -75,14 +84,38 @@ export async function PUT(
     ) as AdminJwtPayload
 
     if (decoded.role !== "admin")
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 })
+      return NextResponse.json(
+        { message: "Forbidden" },
+        { status: 403 }
+      )
 
-    const { name, price, language } = await req.json()
-    if (!name || !price || !language)
+    const { name, language, price } = await req.json()
+
+    if (!name || !language || !price) {
       return NextResponse.json(
         { message: "All fields are required" },
         { status: 400 }
       )
+    }
+
+    const requiredDays = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ]
+
+    for (const day of requiredDays) {
+      if (price[day] === undefined || price[day] === "") {
+        return NextResponse.json(
+          { message: `Price missing for ${day}` },
+          { status: 400 }
+        )
+      }
+    }
 
     await client.connect()
     const db = client.db("maindatabase")
@@ -92,17 +125,27 @@ export async function PUT(
       {
         $set: {
           name,
-          price: Number(price),
           language,
+          price: {
+            monday: Number(price.monday),
+            tuesday: Number(price.tuesday),
+            wednesday: Number(price.wednesday),
+            thursday: Number(price.thursday),
+            friday: Number(price.friday),
+            saturday: Number(price.saturday),
+            sunday: Number(price.sunday),
+          },
+          updated_at: new Date(),
         },
       }
     )
 
-    if (!result.matchedCount)
+    if (!result.matchedCount) {
       return NextResponse.json(
         { message: "Newspaper not found" },
         { status: 404 }
       )
+    }
 
     return NextResponse.json({
       message: "Newspaper updated successfully",

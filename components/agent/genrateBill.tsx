@@ -31,12 +31,19 @@ interface Customer {
 }
 
 interface BillItem {
-  type: string
+  type: "newspaper" | "booklet" | "extra"
   name: string
-  price: number
   qty: number
   amount: number
+  price?: number
 }
+
+const getDisplayPrice = (item: BillItem) => {
+  if (item.price) return item.price
+  if (item.qty > 0) return Math.round(item.amount / item.qty)
+  return "-"
+}
+
 
 /* ================= PAGE ================= */
 
@@ -155,7 +162,7 @@ export default function AgentGenerateBillPage() {
             {/* 🔑 GUID + Customer */}
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
-                <span className="font-semibold text-black">
+                <span className="font-semibold ">
                   बिल आईडी (GUID):
                 </span>{" "}
                 {guid}
@@ -163,7 +170,7 @@ export default function AgentGenerateBillPage() {
 
               {selectedCustomer && (
                 <div>
-                  <span className="font-semibold text-black">ग्राहक:</span>{" "}
+                  <span className="font-semibold ">ग्राहक:</span>{" "}
                   {selectedCustomer.name} {selectedCustomer.surname}
                   {" | "}
                   {selectedCustomer.email}
@@ -193,22 +200,30 @@ export default function AgentGenerateBillPage() {
               </TableHeader>
 
               <TableBody>
-                {items.map((i, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell>{i.name}</TableCell>
-                    <TableCell>₹{i.price}</TableCell>
-                    <TableCell>{i.qty}</TableCell>
-                    <TableCell>₹{i.amount}</TableCell>
-                  </TableRow>
-                ))}
+  {items.map((i, idx) => (
+    <TableRow key={idx}>
+      <TableCell>{i.name}</TableCell>
 
-                <TableRow>
-                  <TableCell colSpan={3} className="text-right font-bold">
-                    कुल राशि
-                  </TableCell>
-                  <TableCell className="font-bold">₹{total}</TableCell>
-                </TableRow>
-              </TableBody>
+      {/* ✅ Safe price */}
+      <TableCell>
+        {typeof getDisplayPrice(i) === "number"
+          ? `₹${getDisplayPrice(i)}`
+          : "—"}
+      </TableCell>
+
+      <TableCell>{i.qty}</TableCell>
+      <TableCell>₹{i.amount}</TableCell>
+    </TableRow>
+  ))}
+
+  <TableRow>
+    <TableCell colSpan={3} className="text-right font-bold">
+      कुल राशि
+    </TableCell>
+    <TableCell className="font-bold">₹{total}</TableCell>
+  </TableRow>
+</TableBody>
+
             </Table>
           </CardContent>
         </Card>

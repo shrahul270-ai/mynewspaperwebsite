@@ -1,5 +1,5 @@
 import { headers } from "next/headers"
-import { MongoClient, ObjectId } from "mongodb"
+import { MongoClient } from "mongodb"
 
 import {
   Table,
@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 
 /* =====================
@@ -19,9 +18,16 @@ import { Badge } from "@/components/ui/badge"
 export interface Newspaper {
   _id: string
   name: string
-  price: number
   language: string
-  agentId: string
+  price: {
+    monday: number
+    tuesday: number
+    wednesday: number
+    thursday: number
+    friday: number
+    saturday: number
+    sunday: number
+  }
 }
 
 /* =====================
@@ -29,38 +35,44 @@ export interface Newspaper {
 ===================== */
 const client = new MongoClient(process.env.MONGODB_URI!)
 
-export default async function AgentNewspapers() {
-  // 🔐 Agent ID from headers
-  const agentId = (await headers()).get("ID")
-//   console.log("Agent : "+agentId)
+function getTodayPrice(price: Newspaper["price"]) {
+  const days = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ] as const
 
+  const today = days[new Date().getDay()]
+  return price[today]
+}
+
+export default async function AgentNewspapers() {
   await client.connect()
   const db = client.db("maindatabase")
+
   const newspapers = await db
     .collection<Newspaper>("newspapers")
     .find({})
     .toArray()
 
-    const paperid = new ObjectId(newspapers[0].agentId )
-    console.log(paperid)    
-
   return (
     <div className="p-6">
-        <div className="flex justify-between">
-
-      <h1 className="text-xl font-semibold mb-4">Newspapers List</h1>
-            {/* <Link href="/agent/add-newspaper"><Button variant={"outline"}>Add Your</Button></Link> */}
-        </div>
+      <h1 className="text-xl font-semibold mb-4">
+        Newspapers List
+      </h1>
 
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Language</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead className="text-right">Status</TableHead>
+            <TableHead>Today Price</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="text-right">Edit</TableHead>
-
           </TableRow>
         </TableHeader>
 
@@ -69,14 +81,19 @@ export default async function AgentNewspapers() {
             <TableRow key={paper._id}>
               <TableCell>{paper.name}</TableCell>
               <TableCell>{paper.language}</TableCell>
-              <TableCell>₹{paper.price}</TableCell>
+
+              {/* ✅ Today price */}
+              <TableCell>
+                ₹{getTodayPrice(paper.price)}
+              </TableCell>
+
+              <TableCell>
+                <Badge>Active</Badge>
+              </TableCell>
 
               <TableCell className="text-right">
-                <Badge variant={"default"}>Active</Badge>
-              </TableCell>
-              <TableCell className="text-right">
                 <a href={`/admin/newspapers/${paper._id}/edit`}>
-                  <Button>Edit</Button>
+                  <Button size="sm">Edit</Button>
                 </a>
               </TableCell>
             </TableRow>
