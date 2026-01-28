@@ -213,19 +213,19 @@ export async function DELETE(
       )
 
     // Optional: Check if newspaper has any subscriptions before deleting
-    // const subscriptionCount = await db
-    //   .collection("subscriptions")
-    //   .countDocuments({ newspaperId: id })
+    const subscriptionCount = await db
+      .collection("subscriptions")
+      .countDocuments({ newspaperId: id })
     
-    // if (subscriptionCount > 0) {
-    //   return NextResponse.json(
-    //     { 
-    //       message: "Cannot delete newspaper with active subscriptions",
-    //       subscriptionCount 
-    //     },
-    //     { status: 400 }
-    //   )
-    // }
+    if (subscriptionCount > 0) {
+      return NextResponse.json(
+        { 
+          message: "Cannot delete newspaper with active subscriptions",
+          subscriptionCount 
+        },
+        { status: 400 }
+      )
+    }
 
     // Delete the newspaper
     const result = await db
