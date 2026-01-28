@@ -6,4 +6,8 @@ import React from 'react'
 export default function Page() {
   const router = useRouter()
   redirect("/index.html")
+
+
 }
+
+
