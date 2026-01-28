@@ -158,3 +158,113 @@ export async function PUT(
     )
   }
 }
+
+
+/* ======================
+   DELETE : Remove Newspaper
+====================== */
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params
+
+    // Token verification
+    const token = (await cookies()).get("token")?.value
+    if (!token)
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      )
+
+    // JWT verification
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET!
+    ) as AdminJwtPayload
+
+    // Check if user is admin
+    if (decoded.role !== "admin")
+      return NextResponse.json(
+        { message: "Forbidden" },
+        { status: 403 }
+      )
+
+    // Validate ObjectId
+    if (!ObjectId.isValid(id))
+      return NextResponse.json(
+        { message: "Invalid newspaper ID" },
+        { status: 400 }
+      )
+
+    await client.connect()
+    const db = client.db("maindatabase")
+
+    // Check if newspaper exists
+    const existingNewspaper = await db
+      .collection("newspapers")
+      .findOne({ _id: new ObjectId(id) })
+
+    if (!existingNewspaper)
+      return NextResponse.json(
+        { message: "Newspaper not found" },
+        { status: 404 }
+      )
+
+    // Optional: Check if newspaper has any subscriptions before deleting
+    // const subscriptionCount = await db
+    //   .collection("subscriptions")
+    //   .countDocuments({ newspaperId: id })
+    
+    // if (subscriptionCount > 0) {
+    //   return NextResponse.json(
+    //     { 
+    //       message: "Cannot delete newspaper with active subscriptions",
+    //       subscriptionCount 
+    //     },
+    //     { status: 400 }
+    //   )
+    // }
+
+    // Delete the newspaper
+    const result = await db
+      .collection("newspapers")
+      .deleteOne({ _id: new ObjectId(id) })
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { message: "Newspaper not found or already deleted" },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({
+      message: "Newspaper deleted successfully",
+      deletedId: id
+    }, { status: 200 })
+
+  } catch (error) {
+    console.error("DELETE Error:", error)
+    
+    // Handle specific errors
+    if (error instanceof jwt.JsonWebTokenError) {
+      return NextResponse.json(
+        { message: "Invalid token" },
+        { status: 401 }
+      )
+    }
+    
+    if (error instanceof jwt.TokenExpiredError) {
+      return NextResponse.json(
+        { message: "Token expired" },
+        { status: 401 }
+      )
+    }
+
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
