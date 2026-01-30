@@ -1,42 +1,21 @@
-// 🌟 ================= MOBILE SIDEBAR TOGGLE =================
-const menuToggle = document.getElementById("menuToggle");
-const navList = document.querySelector(".nav-list");
-const overlay = document.getElementById("overlay");
+ document.addEventListener("DOMContentLoaded", function () {
 
-if (menuToggle && navList) {
+  const menuToggle = document.getElementById("menuToggle");
+  const navList = document.getElementById("navList");
+
   menuToggle.addEventListener("click", () => {
     navList.classList.toggle("active");
-
-    // ☰ ↔ ✖ icon change
-    menuToggle.innerHTML = navList.classList.contains("active") ? "&times;" : "&#9776;";
-
-    // Overlay toggle
-    if (overlay) overlay.classList.toggle("active");
+    menuToggle.innerHTML = navList.classList.contains("active") ? "✖" : "☰";
   });
-}
 
-// Overlay click closes sidebar
-if (overlay) {
-  overlay.addEventListener("click", () => {
-    navList.classList.remove("active");
-    overlay.classList.remove("active");
-    menuToggle.innerHTML = "&#9776;";
-  });
-}
-
-// ✅ Auto-close sidebar when clicking a dropdown link (mobile)
-// ✅ Fixed Mobile Dropdown Toggle
-document.querySelectorAll(".nav-item.dropdown").forEach(drop => {
-  const toggle = drop.querySelector(".dropdown-toggle");
-  if (!toggle) return;
-  toggle.addEventListener("click", (e) => {
-    if (window.innerWidth <= 900) {
+  document.querySelectorAll(".dropdown-toggle").forEach(item => {
+    item.addEventListener("click", e => {
       e.preventDefault();
-      drop.classList.toggle("show");
-    }
+      item.parentElement.classList.toggle("active");
+    });
   });
-});
 
+});
 
 // ===== LIVE NEWS FEED (Demo Placeholder) =====
 async function loadLiveNews() {
@@ -144,3 +123,72 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+const menu = document.querySelector('.nav-list');
+  const btn = document.getElementById('menu-btn');
+
+  btn.addEventListener('click', () => {
+    menu.classList.toggle('active');
+  });
+  ////NAV JS ////
+  // ✅ Mobile Dropdown Toggle
+  document.getElementById("menuToggle").addEventListener("click", function (e) {
+    e.stopPropagation();
+    document.getElementById("navList").classList.toggle("active");
+  });
+
+  document.addEventListener("click", function (e) {
+    const nav = document.getElementById("navList");
+    const toggle = document.getElementById("menuToggle");
+
+    if (!nav.contains(e.target) && !toggle.contains(e.target)) {
+      nav.classList.remove("active");
+    }
+  });
+  
+  //////toggle navbar////
+
+document.getElementById("contact-form").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  emailjs.sendForm(
+    "SERVICE_ID",
+    "TEMPLATE_ID",
+    this
+  ).then(
+    function() {
+      alert("Email sent successfully ✅");
+    },
+    function(error) {
+      alert("Failed ❌ " + error.text);
+    }
+  );
+});
+
+/////dots/////
+document.addEventListener("DOMContentLoaded", () => {
+
+  const slides = document.querySelectorAll(".testimonial-slide");
+  const dots = document.querySelectorAll(".dot");
+  let index = 0;
+
+  function showSlide(i) {
+    slides.forEach(slide => slide.classList.remove("active"));
+    dots.forEach(dot => dot.classList.remove("active"));
+
+    slides[i].classList.add("active");
+    dots[i].classList.add("active");
+  }
+
+  function autoSlide() {
+    index = (index + 1) % slides.length;
+    showSlide(index);
+  }
+
+  // First slide show
+  showSlide(index);
+
+  // Change slide every 4 seconds
+  setInterval(autoSlide, 4000);
+
+});
+

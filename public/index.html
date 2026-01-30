@@ -1,28 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NewsPaper</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/com.css">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-
-
 </head>
 <!-- 🌟 Developer Contact Popup -->
 <div id="devPopup" class="dev-popup">
   <div class="dev-popup-content">
     <span class="close-btn" id="closePopup">&times;</span>
-    <h3>💬 Contact Developer</h3>
+    <h3>💬Contact Developer</h3>
     <p>Have a query or need help with this website? Reach out below:</p>
-    <a href="mailto:developer@email.com" class="popup-btn">📧 Send Email</a>
-    <a href="https://wa.me/919876543210" target="_blank" class="popup-btn">💬 Chat on WhatsApp</a>
+    <a href="#"
+   class="popup-btn"
+   onclick="openGmail(); return false;">
+  📧 Send Email
+</a>
+
+<script>
+function openGmail() {
+  window.open(
+    "https://mail.google.com/mail/?view=cm&fs=1&to=support@balajiprimemedia.in",
+    "_blank"
+  );
+}
+</script>
+
+    <a href="https://wa.me/9694953370" target="_blank" class="popup-btn">💬 Chat on WhatsApp</a>
   </div>
 </div>
 
@@ -40,25 +48,25 @@
     </div>
     <!-- Toggle Button for Mobile -->
     <div class="menu-toggle" id="menuToggle">&#9776;</div>
-    <ul class="nav-list">
-      <li class="nav-item"><a href="index.html"  class="nav-link" class="active">Home</a></li>
-      <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
-      <li class="nav-item"><a href="blog.html" target="_blank" class="nav-link">Blog</a></li>
-      <li class="nav-item"><a href="service.html"  class="nav-link">Services</a></li>
-      <li class="nav-item"><a href="contact.html"  class="nav-link">Contact Us</a></li>
-       <!-- 🌟 FRANCHISE DROPDOWN -->
-    <li class="nav-item dropdown">
-      <a href="#" class="nav-link dropdown-toggle">Franchise ▾</a>
-      <ul class="dropdown-menu">
-        <li><a href="newfrenchise.html">Apply for New Franchise</a></li>
-        <li><a href="search.html">Search Franchise</a></li>
-     
-      </ul>
-    </li>
+   <ul class="nav-list" id="navList">
+  <li class="nav-item"><a href="index.html" class="nav-link" class="Active">Home</a></li>
+  <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
+  <li class="nav-item"><a href="blog.html" class="nav-link">Blog</a></li>
+  <li class="nav-item"><a href="service.html" class="nav-link">Services</a></li>
+  <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
+
+  <li class="nav-item dropdown">
+    <a href="#" class="nav-link dropdown-toggle">Franchise ▾</a>
+    <ul class="dropdown-menu">
+      <li><a href="newfrenchise.html">Apply for New Franchise</a></li>
+      <li><a href="search.html">Search Franchise</a></li>
     </ul>
+  </li>
+</ul>
+
      <div class="nav-buttons">
       <a href="sign.html" class="btn btn-signin">Sign In</a>
-     
+    
     </div>
     
   </nav>
@@ -67,7 +75,11 @@
  <!-- 🎥 Hero Section -->
  <section class="hero">
   <video autoplay muted loop id="bgVideo">
+
+    <source src="image/From KlickPin CF Pinterest Pin-21392166974214897.mp4" type="video/mp4" />
+
     <source src="https://www.pexels.com/download/video/4486355/" type="video/mp4" />
+
   </video>
 
   <div class="overlay"></div>
@@ -96,66 +108,78 @@
   </div>
 </section>
   </main>
-  
-      <!-- 🌟 HORIZONTAL AUTO SLIDING LATEST NEWS -->
-<section class="horizontal-news-slider">
-  <h2 class="slider-title">Latest News</h2>
-  <div class="slider-wrapper" id="autoSlider">
-    <div class="slider-track">
-      <a href="https://www.reuters.com/markets/" target="_blank" class="news-card">
-        <img src="image/global.jpg" alt="News 1">
+
+<!-- 🗞️ LATEST NEWS CARDS SECTION -->
+<section class="latest-news-cards">
+  <h2 class="news-title">Latest News</h2>
+
+  <div class="news-cards-container">
+
+    <a href="https://www.reuters.com/markets/" target="_blank" class="news-card">
+      <img src="image/global.jpg" alt="Global Market">
+      <div class="news-content">
         <h3>Global Market Update</h3>
         <p>Stock markets surged today after positive economic news.</p>
-      </a>
-      <a href="https://www.espncricinfo.com/" target="_blank" class="news-card">
-        <img src="image/sports.jpg" alt="News 2">
+      </div>
+    </a>
+
+    <a href="https://www.espncricinfo.com/" target="_blank" class="news-card">
+      <img src="image/sports.jpg" alt="Sports News">
+      <div class="news-content">
         <h3>Sports Highlights</h3>
-        <p>India secures a thrilling win in the T20 series, fans celebrate nationwide.</p>
-      </a>
-      <a href="https://techcrunch.com/" target="_blank" class="news-card">
-        <img src="image/tech.jpg" alt="News 3">
+        <p>India secures a thrilling win in the T20 series.</p>
+      </div>
+    </a>
+
+    <a href="https://techcrunch.com/" target="_blank" class="news-card">
+      <img src="image/tech.jpg" alt="Tech News">
+      <div class="news-content">
         <h3>Tech Innovations</h3>
-        <p>New AI tools are transforming businesses and education worldwide.</p>
-      </a>
-      <a href="https://www.healthline.com/" target="_blank" class="news-card">
-        <img src="image/health.jpg" alt="News 4">
-        <h3>Health Advisory</h3>
-        <p>Experts recommend staying hydrated during the current heatwave.</p>
-      </a>
-      
-       <a href="https://www.reuters.com/markets/" target="_blank" class="news-card">
-        <img src="image/global.jpg" alt="News 1">
-        <h3>Global Market Update</h3>
-        <p>Stock markets surged today after positive economic news.</p>
-      </a>
-      <a href="https://www.espncricinfo.com/" target="_blank" class="news-card">
-        <img src="image/sports.jpg" alt="News 2">
-        <h3>Sports Highlights</h3>
-        <p>India secures a thrilling win in the T20 series, fans celebrate nationwide.</p>
-      </a>
-      <a href="https://techcrunch.com/" target="_blank" class="news-card">
-        <img src="image/tech.jpg" alt="News 3">
-        <h3>Tech Innovations</h3>
-        <p>New AI tools are transforming businesses and education worldwide.</p>
-      </a>
-      <a href="https://www.healthline.com/" target="_blank" class="news-card">
-        <img src="image/health.jpg" alt="News 4">
-        <h3>Health Advisory</h3>
-        <p>Experts recommend staying hydrated during the current heatwave.</p>
-      </a>
-      
+        <p>New AI tools are transforming businesses worldwide.</p>
+      </div>
+    </a>
+</section>
+    
+ 
+<section class="featured-section">
+  <h2 class="featured-title">Editor’s Picks</h2>
+
+  <div class="featured-container">
+    
+    <div class="featured-card">
+      <img src="image/abnews1.jpg" alt="Politics">
+      <div class="featured-content">
+        <span class="tag politics">Politics</span>
+        <h3>Government Announces New Economic Policy</h3>
+        <p>The government has introduced a new policy aimed at boosting economic growth and employment.</p>
+        <a href="#" class="read-more">Read More →</a>
+      </div>
     </div>
+
+    <div class="featured-card">
+      <img src="image/abwes.webp" alt="World News">
+      <div class="featured-content">
+        <span class="tag world">World</span>
+        <h3>Global Leaders Meet for Climate Summit</h3>
+        <p>World leaders gather to discuss urgent climate actions and sustainable development.</p>
+        <a href="#" class="read-more">Read More →</a>
+      </div>
+    </div>
+
+    <div class="featured-card">
+      <img src="image/best.webp" alt="Science">
+      <div class="featured-content">
+        <span class="tag science">Science</span>
+        <h3>New Space Mission Achieves Major Milestone</h3>
+        <p>Scientists celebrate a major breakthrough in space exploration technology.</p>
+        <a href="#" class="read-more">Read More →</a>
+      </div>
+    </div>
+
   </div>
 </section>
 
 
-<!-- 🔴 BREAKING NEWS BAR
-<div class="breaking-news-bar">
-  <div class="breaking-title">Breaking News</div>
-  <div class="breaking-ticker" id="breakingTicker">
-    <span>🚨 Earthquake tremors felt in Delhi NCR | 🏏 India wins T20 series against England | 💼 Sensex hits record high | 🌧️ Heavy rain alert in Mumbai | 🛰️ ISRO announces new Mars mission plan</span>
-  </div>
-</div> -->
 
 <!-- 🗞️ BEAUTIFUL TOP CATEGORY SECTION -->
 <section class="category-section">
@@ -191,13 +215,34 @@
         <p>Your daily dose of movies, celebrity news, and the latest trends from Bollywood.</p>
       </div>
     </a>
-
+  </div>
+</section>
+<!-- 🌟 NEW SECTION: Featured Services -->
+<section class="featured-services">
+  <h2 class="section-title">Our Featured Services</h2>
+  <div class="services-container">
     
+    <div class="service-card">
+      <i class="fas fa-newspaper service-icon"></i>
+      <h3>Daily News Updates</h3>
+      <p>Stay informed with our comprehensive daily news coverage from around the world.</p>
+    </div>
+
+    <div class="service-card">
+      <i class="fas fa-chart-line service-icon"></i>
+      <h3>Market Insights</h3>
+      <p>Get expert analysis on global markets and make informed decisions.</p>
+    </div>
+
+    <div class="service-card">
+      <i class="fas fa-video service-icon"></i>
+      <h3>Video Coverage</h3>
+      <p>Watch exclusive video reports on trending news and events.</p>
+    </div>
+
 
   </div>
 </section>
-
-
 <!-- 🌟 STATS COUNTER SECTION -->
 <section class="stats-counter">
   <h2>Our Impact in Numbers</h2>
@@ -238,9 +283,8 @@
           <li><a href="service.html">Services</a></li>
           <li><a href="contact.html">Contact</a></li>
           <li><a href="newfrenchise.html">Franchise</a></li>
-          <li><a href="sitemap.html">Sitemap</a></li>
 
-          
+          <li><a href="sitemap.html">Sitemap</a></li>          
         </ul>
       </div>
 
@@ -266,19 +310,31 @@
     </div>
       <div class="footer-right">
         <h4>Contact Us</h4>
-        <p>Email: info@newspaper.com</p>
-        <p>Phone: +91 9876543210</p>
+        <div class="contact-email">
+  <i class="fa-solid fa-envelope"></i>
+  <a href="mailto:support@balajiprimemedia.in
+?subject=Inquiry from Website
+&body=Hello Balaji Prime Media," onclick="openMail()">
+support@balajiprimemedia.in
+</a>
+</div>
+
+
+        <p>Phone: +91 9694953370</p>
+
         <div class="socials">
           <a href="#" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
   <a href="#" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
-  <a href="#" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+  <a href="https://www.instagram.com/nearpaper/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
   <a href="#" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
   <a href="#" target="_blank" title="YouTube"><i class="fab fa-telegram"></i></a>
         </div>
       </div>
     </div>
-    <p class="footer-bottom">© 2025 NewsPaper. All rights reserved.</p>
-    
+    <p class="footer-bottom">© 2026 All rights reserved by <span>
+            <a href="https://www.balajiprimemedia.in" target="_blank">balajiprimemedia</a>
+
+    </span></p>
   </footer>
 <!-- 🌟 WhatsApp Floating Button -->
 <a href="https://wa.me/919694953370?text=Hello!%20I%20would%20like%20to%20know%20more%20about%20your%20services."
@@ -291,161 +347,19 @@
 </a>
 
   <script src="js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+function openMail() {
+  window.open(
+    "https://mail.google.com/mail/?view=cm&fs=1&to=support@balajiprimemedia.in",
+    "_blank"
+  );
+}
+</script>
+
+
 </body>
 
 </html>
 
-
-
-<script>
-
-  document.addEventListener("DOMContentLoaded", function () {
-
-  const menuToggle = document.getElementById("menuToggle");
-  const navList = document.getElementById("navList");
-
-  menuToggle.addEventListener("click", () => {
-    navList.classList.toggle("active");
-    menuToggle.innerHTML = navList.classList.contains("active") ? "✖" : "☰";
-  });
-
-  document.querySelectorAll(".dropdown-toggle").forEach(item => {
-    item.addEventListener("click", e => {
-      e.preventDefault();
-      item.parentElement.classList.toggle("active");
-    });
-  });
-
-});
-
-// ===== LIVE NEWS FEED (Demo Placeholder) =====
-async function loadLiveNews() {
-  const feed = document.getElementById("liveFeed");
-  if (!feed) return;
-  feed.innerHTML = "<li>Fetching latest news...</li>";
-
-  try {
-    const res = await fetch("https://gnews.io");
-    const data = await res.json();
-
-    feed.innerHTML = "";
-    data.articles.forEach(article => {
-      const li = document.createElement("li");
-      li.innerHTML = `<a href="${article.url}" target="_blank">${article.title}</a>`;
-      feed.appendChild(li);
-    });
-  } catch (error) {
-    feed.innerHTML = "<li>⚠️ Could not load live news. Please try again later.</li>";
-  }
-}
-loadLiveNews();
-setInterval(loadLiveNews, 60000);
-
-// 🔢 Counter Animation (💡 Fixed)
-const counters = document.querySelectorAll(".counter");
-const speed = 150;
-
-let counterStarted = false; // prevent re-run
-
-function startCounter() {
-  if (counterStarted) return;
-  counterStarted = true;
-
-  counters.forEach(counter => {
-    const updateCount = () => {
-      const target = +counter.getAttribute("data-target");
-      const count = +counter.innerText;
-      const increment = target / speed;
-
-      if (count < target) {
-        counter.innerText = Math.ceil(count + increment);
-        setTimeout(updateCount, 20);
-      } else {
-        counter.innerText = target.toLocaleString();
-      }
-    };
-    updateCount();
-  });
-}
-
-// Start counter only once when visible
-const counterSection = document.querySelector(".stats-counter");
-if (counterSection) {
-  const observer = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) {
-      startCounter();
-      observer.unobserve(counterSection);
-    }
-  }, { threshold: 0.3 });
-  observer.observe(counterSection);
-}
-
-// 🌟 Developer Contact Popup Script
-const contactLink = document.getElementById("contactDevLink");
-const popup = document.getElementById("devPopup");
-const closePopup = document.getElementById("closePopup");
-
-if (contactLink && popup && closePopup) {
-  contactLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    popup.style.display = "flex";
-  });
-
-  closePopup.addEventListener("click", () => {
-    popup.style.display = "none";
-  });
-
-  window.addEventListener("click", (e) => {
-    if (e.target === popup) popup.style.display = "none";
-  });
-}
-
-// 🪧 Ads Scroll Behavior
-document.addEventListener("DOMContentLoaded", function () {
-  const adTrack = document.querySelector(".ad-track");
-  if (!adTrack) return;
-
-  let pauseTimeout;
-  const pauseScroll = () => {
-    adTrack.style.animationPlayState = "paused";
-    clearTimeout(pauseTimeout);
-    pauseTimeout = setTimeout(() => {
-      adTrack.style.animationPlayState = "running";
-    }, 2000);
-  };
-
-  adTrack.addEventListener("touchstart", pauseScroll);
-  adTrack.addEventListener("mousedown", pauseScroll);
-
-  adTrack.querySelectorAll("a").forEach(link => {
-    link.addEventListener("touchend", (e) => {
-      e.stopPropagation();
-      window.open(link.href, "_blank");
-    });
-  });
-});
-const menu = document.querySelector('.nav-list');
-  const btn = document.getElementById('menu-btn');
-
-  btn.addEventListener('click', () => {
-    menu.classList.toggle('active');
-  });
-  ////NAV JS ////
-  // ✅ Mobile Dropdown Toggle
-  document.getElementById("menuToggle").addEventListener("click", function (e) {
-    e.stopPropagation();
-    document.getElementById("navList").classList.toggle("active");
-  });
-
-  document.addEventListener("click", function (e) {
-    const nav = document.getElementById("navList");
-    const toggle = document.getElementById("menuToggle");
-
-    if (!nav.contains(e.target) && !toggle.contains(e.target)) {
-      nav.classList.remove("active");
-    }
-  });
-  
-  
-
-</script>
